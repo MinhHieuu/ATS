@@ -19,14 +19,9 @@ public class CandidateEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column(name = "full_name", nullable = false, length = 100)
-    private String fullName;
-    @Column(nullable = false, unique = true, length = 150)
-    private String email;
-    @Column(length = 20)
-    private String phone;
-    @Column(length = 255)
-    private String address;
+    @OneToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "user_id", nullable = false)
+    private UserEntity user;
     @Column(name = "linkedin_url", length = 255)
     private String linkedinUrl;
     @Column(name = "github_url", length = 255)
@@ -39,11 +34,10 @@ public class CandidateEntity {
     private Integer yearsOfExperience;
     @Column(name = "created_at", nullable = false)
     private Instant createdAt;
-    @Column(name = "updated_at", nullable = false)
+    @Column(name = "updated_at")
     private Instant updatedAt;
     @OneToMany(mappedBy = "candidate")
     private List<ResumeEntity> resumes;
     @OneToMany(mappedBy = "candidate")
     private List<ApplicationEntity> applications;
-
 }

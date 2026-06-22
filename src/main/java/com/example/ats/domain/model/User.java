@@ -12,7 +12,7 @@ public record User(
         Boolean active,
         Instant createdAt,
         Instant updatedAt,
-        Long roleId
+        Role role
 ) {
 
 }

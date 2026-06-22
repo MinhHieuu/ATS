@@ -5,7 +5,6 @@ import java.time.Instant;
 public record Candidate(
         Long id,
         Long userId,
-        String address,
         String linkedinUrl,
         String githubUrl,
         String portfolioUrl,

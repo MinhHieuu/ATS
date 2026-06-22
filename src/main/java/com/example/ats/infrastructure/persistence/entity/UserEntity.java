@@ -1,7 +1,11 @@
 package com.example.ats.infrastructure.persistence.entity;
 
+import com.example.ats.domain.model.Role;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.Instant;
@@ -11,6 +15,9 @@ import java.util.List;
 @Table(name = "users")
 @Getter
 @Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class UserEntity {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -20,23 +27,25 @@ public class UserEntity {
     private String email;
     @Column(nullable = false)
     private String password;
-    @Column(length = 20)
+    @Column(length = 20, unique = true)
     private String phone;
     @Column(name = "avatar_url")
     private String avatarUrl;
     @Column(name = "is_active", nullable = false)
-    private Boolean active = true;
+    private Boolean active;
     @Column(name = "created_at", nullable = false)
     private Instant createdAt;
-    @Column(name = "updated_at", nullable = false)
+    @Column(name = "updated_at")
     private Instant updatedAt;
-    @ManyToOne()
-    @JoinColumn(name = "role_id")
-    private RoleEntity role;
+    @Column
+    @Enumerated(EnumType.STRING)
+    private Role role;
+    @OneToOne(mappedBy = "user")
+    private CandidateEntity candidate;
+    @OneToOne(mappedBy = "user")
+    private RecuiterEntity recuiter;
     @OneToMany(mappedBy = "user")
     private List<ActivityLogEntity> actions;
-    @OneToMany(mappedBy = "interviewer")
-    private List<InterviewEntity> interviews;
-    @OneToMany(mappedBy = "reviewer")
-    private List<InterviewFeedbackEntity> feedbacks;
+  
+
 }

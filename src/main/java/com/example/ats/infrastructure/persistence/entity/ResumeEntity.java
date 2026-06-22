@@ -2,6 +2,7 @@ package com.example.ats.infrastructure.persistence.entity;
 
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.Instant;
@@ -10,6 +11,7 @@ import java.time.Instant;
 @Table(name = "resumes")
 @Getter
 @Setter
+@NoArgsConstructor
 public class ResumeEntity {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

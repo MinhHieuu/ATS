@@ -5,7 +5,7 @@ import java.time.Instant;
 public record InterviewFeedback(
     Long id,
     Long interviewId,
-    Long reviewerId,
+    Long recuiterId,
     Integer rating,
     String comment,
     String recommendation,

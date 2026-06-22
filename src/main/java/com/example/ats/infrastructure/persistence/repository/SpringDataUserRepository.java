@@ -6,4 +6,7 @@ import java.util.Optional;
 
 public interface SpringDataUserRepository extends JpaRepository<UserEntity, Long> {
     Optional<UserEntity> findByEmailIgnoreCase(String email);
+    Optional<UserEntity> findByPhone(String phone);
+    boolean existsByEmailIgnoreCase(String email);
+    boolean existsByPhone(String phone);
 }

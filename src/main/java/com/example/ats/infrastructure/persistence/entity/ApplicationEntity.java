@@ -34,15 +34,13 @@ public class ApplicationEntity {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 50)
     private ApplicationStatus status;
-    @Column(length = 100)
-    private String source;
     @Column(name = "expected_salary", precision = 12, scale = 2)
     private BigDecimal expectedSalary;
     @Column(columnDefinition = "TEXT")
     private String note;
     @Column(name = "applied_at", nullable = false)
     private Instant appliedAt;
-    @Column(name = "updated_at", nullable = false)
+    @Column(name = "updated_at")
     private Instant updatedAt;
     @OneToMany(mappedBy = "application")
     private List<InterviewEntity> interviews;
