@@ -1,20 +1,26 @@
 package com.example.ats.domain.model;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
+
 import java.math.BigDecimal;
 import java.time.Instant;
 
-public record Job(
-        Long id,
-        String title,
-        String description,
-        String requirements,
-        String location,
-        String employmentType,
-        BigDecimal salaryMin,
-        BigDecimal salaryMax,
-        JobStatus status,
-        Long createdBy,
-        Instant createdAt,
-        Instant updatedAt
-) {
+@Getter
+@Setter
+@AllArgsConstructor
+public class Job {
+    private Long id;
+    private String title;
+    private String description;
+    private String requirements;
+    private String location;
+    private String employmentType;
+    private BigDecimal salaryMin;
+    private BigDecimal salaryMax;
+    private JobStatus status;
+    private Long createdBy;
+    private Instant createdAt;
+    private Instant updatedAt;
 }

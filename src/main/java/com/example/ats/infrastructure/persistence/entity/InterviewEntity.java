@@ -21,7 +21,7 @@ public class InterviewEntity {
     private ApplicationEntity application;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "interviewer_id")
-    private RecuiterEntity interviewer;
+    private RecruiterEntity interviewer;
     @Column(length = 150)
     private String title;
     @Column(name = "interview_time", nullable = false)
