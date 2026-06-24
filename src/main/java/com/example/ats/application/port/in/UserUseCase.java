@@ -11,4 +11,5 @@ public interface UserUseCase {
     UserResponse findById(Long id);
     UserResponse update(UserRequest request);
     Void changePassword(Long id, ChangePasswordRequest request);
+    UserResponse findByEmail(String email);
 }

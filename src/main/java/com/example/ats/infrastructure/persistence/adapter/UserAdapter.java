@@ -42,13 +42,13 @@ public class UserAdapter implements UserRepository {
     @Override
     public User findByEmail(String email) {
         return userRepository.findByEmail(email).map(this::toUser)
-                .orElseThrow(() -> new EntityNotFoundException("user not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("user not found"));
     }
 
     @Override
     public User findByPhone(String phone) {
         return userRepository.findByPhone(phone).map(this::toUser)
-                .orElseThrow(() -> new EntityNotFoundException("user not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("user not found"));
     }
 
     @Override

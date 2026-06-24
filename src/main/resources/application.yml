@@ -30,3 +30,7 @@ ats:
   upload:
     directory: ${UPLOAD_DIR:D:/uploads}
     public-path: /uploads
+jwt:
+  secret-key: "0fd7c04cb27fd9f9c6ab410fd01931256a6786278deeed72c2cb751388f2fed1"
+  access-expiration: 300
+  refresh-expiration: 10800
