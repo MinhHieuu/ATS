@@ -13,6 +13,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -22,6 +23,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
+@AllArgsConstructor
 public class RecruiterEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -38,4 +40,11 @@ public class RecruiterEntity {
     private List<InterviewEntity> interviews;
     @OneToMany(mappedBy = "reviewer")
     private List<InterviewFeedbackEntity> feedbacks;
+
+    public RecruiterEntity(Long id, UserEntity user, CompanyEntity company, String position) {
+        this.id = id;
+        this.user = user;
+        this.company = company;
+        this.position = position;
+    }
 }
