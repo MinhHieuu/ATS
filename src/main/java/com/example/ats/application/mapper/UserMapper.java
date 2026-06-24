@@ -4,7 +4,6 @@ import com.example.ats.application.dto.response.UserResponse;
 import com.example.ats.domain.model.User;
 import com.example.ats.infrastructure.persistence.entity.UserEntity;
 import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
 
 @Mapper(componentModel = "spring")
 public interface UserMapper {
