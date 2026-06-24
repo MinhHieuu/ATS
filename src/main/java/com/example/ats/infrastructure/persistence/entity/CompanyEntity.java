@@ -34,6 +34,6 @@ public class CompanyEntity {
     @Column(name = "update_at")
     private Instant updatedAt;
     @OneToMany(mappedBy = "company")
-    private List<RecuiterEntity> recuiters;
+    private List<RecruiterEntity> recruiters;
 
 }

@@ -18,11 +18,11 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "recuiters")
+@Table(name = "recruiters")
 @Getter
 @Setter
 @NoArgsConstructor
-public class RecuiterEntity {
+public class RecruiterEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

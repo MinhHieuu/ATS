@@ -7,8 +7,9 @@ import lombok.Setter;
 @Getter
 @Setter
 @AllArgsConstructor
-public class ApplicationStage {
+public class Recruiter {
     private Long id;
-    private String name;
-    private Integer position;
+    private Long userId;
+    private Long companyId;
+    private String position;
 }

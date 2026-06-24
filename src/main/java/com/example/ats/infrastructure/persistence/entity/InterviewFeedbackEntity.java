@@ -20,7 +20,7 @@ public class InterviewFeedbackEntity {
     private InterviewEntity interview;
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "reviewer_id", nullable = false)
-    private RecuiterEntity reviewer;
+    private RecruiterEntity reviewer;
     private Integer rating;
     @Column(columnDefinition = "TEXT")
     private String comment;

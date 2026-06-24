@@ -1,15 +1,20 @@
 package com.example.ats.domain.model;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
+
 import java.time.Instant;
 
-public record InterviewFeedback(
-    Long id,
-    Long interviewId,
-    Long recuiterId,
-    Integer rating,
-    String comment,
-    String recommendation,
-    Instant createdAt
-) {
-    
+@Getter
+@Setter
+@AllArgsConstructor
+public class InterviewFeedback {
+    private Long id;
+    private Long interviewId;
+    private Long recruiterId;
+    private Integer rating;
+    private String comment;
+    private String recommendation;
+    private Instant createdAt;
 }

@@ -22,7 +22,7 @@ public class UserEntity {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @Column(name = "full_name", nullable = false, length = 100)
-    private String fullName;
+    private String fullname;
     @Column(nullable = false, unique = true, length = 150)
     private String email;
     @Column(nullable = false)
@@ -43,9 +43,8 @@ public class UserEntity {
     @OneToOne(mappedBy = "user")
     private CandidateEntity candidate;
     @OneToOne(mappedBy = "user")
-    private RecuiterEntity recuiter;
+    private RecruiterEntity recruiter;
     @OneToMany(mappedBy = "user")
     private List<ActivityLogEntity> actions;
-  
 
 }

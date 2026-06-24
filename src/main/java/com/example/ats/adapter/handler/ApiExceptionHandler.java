@@ -1,5 +1,6 @@
-package com.example.ats.adapter.in.web;
+package com.example.ats.adapter.handler;
 
+import com.example.ats.application.service.FileStorageService;
 import com.example.ats.domain.exception.BusinessRuleException;
 import com.example.ats.domain.exception.ResourceNotFoundException;
 import org.springframework.http.HttpStatus;
@@ -36,6 +37,16 @@ public class ApiExceptionHandler {
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<ApiError> handleUnreadableBody(HttpMessageNotReadableException exception) {
         return error(HttpStatus.BAD_REQUEST, "Malformed request or unsupported enum value", Map.of());
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ApiError> handleIllegalArgument(IllegalArgumentException exception) {
+        return error(HttpStatus.BAD_REQUEST, exception.getMessage(), Map.of());
+    }
+
+    @ExceptionHandler(FileStorageService.FileStorageException.class)
+    public ResponseEntity<ApiError> handleFileStorage(FileStorageService.FileStorageException exception) {
+        return error(HttpStatus.INTERNAL_SERVER_ERROR, exception.getMessage(), Map.of());
     }
 
     private ResponseEntity<ApiError> error(HttpStatus status, String message, Map<String, String> details) {

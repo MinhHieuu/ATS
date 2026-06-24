@@ -1,17 +1,22 @@
 package com.example.ats.domain.model;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
+
 import java.time.Instant;
 
-public record Company(
-        Long id,
-        String name,
-        String logo,
-        String email,
-        String website,
-        String description,
-        String address,
-        Instant createdAt,
-        Instant updatedAt
-) {
-
+@Getter
+@Setter
+@AllArgsConstructor
+public class Company {
+    private Long id;
+    private String name;
+    private String logo;
+    private String email;
+    private String website;
+    private String description;
+    private String address;
+    private Instant createdAt;
+    private Instant updatedAt;
 }

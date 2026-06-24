@@ -40,4 +40,17 @@ public class CandidateEntity {
     private List<ResumeEntity> resumes;
     @OneToMany(mappedBy = "candidate")
     private List<ApplicationEntity> applications;
+
+    public CandidateEntity(Long id, UserEntity user, String linkedinUrl, String githubUrl, String portfolioUrl,
+                           String currentPosition, Integer yearsOfExperience, Instant createdAt, Instant updatedAt) {
+        this.id = id;
+        this.user = user;
+        this.linkedinUrl = linkedinUrl;
+        this.githubUrl = githubUrl;
+        this.portfolioUrl = portfolioUrl;
+        this.currentPosition = currentPosition;
+        this.yearsOfExperience = yearsOfExperience;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
+    }
 }
