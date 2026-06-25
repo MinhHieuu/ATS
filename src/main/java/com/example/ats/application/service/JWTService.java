@@ -1,7 +1,9 @@
 package com.example.ats.application.service;
 
+import com.example.ats.domain.exception.BusinessRuleException;
 import com.example.ats.domain.model.Role;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
@@ -13,9 +15,10 @@ import java.security.Key;
 import java.time.Instant;
 import java.util.Date;
 import java.util.Map;
+import java.util.UUID;
 
 @Service
-public class JWTService  {
+public class JWTService {
     @Value("${jwt.secret-key}")
     private String secret;
     @Value("${jwt.access-expiration}")
@@ -24,11 +27,11 @@ public class JWTService  {
     private long refreshExpiration;
 
     private String generateToken(Long userId, Role role, Long expiration) {
-        Map<String, Object> claims = Map.of("userId", userId, "role", role);
+        Map<String, Object> claims = Map.of("userId", userId, "role", role, "jti", UUID.randomUUID().toString());
         return Jwts.builder()
                 .setClaims(claims)
                 .setIssuedAt(Date.from(Instant.now()))
-                .setExpiration(new Date(expiration))
+                .setExpiration(Date.from(Instant.now().plusSeconds(expiration)))
                 .signWith(getSecretKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
@@ -46,10 +49,42 @@ public class JWTService  {
     }
 
     public String generateRefreshToken(Long userId, Role role) {
-       return generateToken(userId, role, refreshExpiration);
+        return generateToken(userId, role, refreshExpiration);
     }
 
     public String generateAccessToken(Long userId, Role role) {
+        return generateToken(userId, role, accessExpiration);
+    }
+
+    public Long getUserIdFromRefreshToken(String token) {
+        try {
+            if (token == null || token.isBlank()) {
+                throw new IllegalArgumentException("Invalid refresh token");
+            }
+            Claims claims = getClaims(token);
+            Number userId = claims.get("userId", Number.class);
+            if (userId == null) {
+                throw new IllegalArgumentException("Invalid refresh token");
+            }
+            return userId.longValue();
+        } catch (JwtException | IllegalArgumentException e) {
+            throw new BusinessRuleException("Invalid refresh token");
+        }
+    }
+
+    public Instant getExpirationFromRefreshToken(String token) {
+        try {
+            if (token == null || token.isBlank()) {
+                throw new IllegalArgumentException("Invalid refresh token");
+            }
+            return getClaims(token).getExpiration().toInstant();
+        } catch (JwtException | IllegalArgumentException e) {
+            throw new BusinessRuleException("Invalid refresh token");
+        }
+    }
+
+    public String refreshAccessToken(String token, Role role) {
+        Long userId = getUserIdFromRefreshToken(token);
         return generateToken(userId, role, accessExpiration);
     }
 }

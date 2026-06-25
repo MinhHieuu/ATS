@@ -2,7 +2,9 @@ package com.example.ats.adapter.controller;
 
 import com.example.ats.application.dto.request.CandidateRequest;
 import com.example.ats.application.dto.request.LoginRequest;
+import com.example.ats.application.dto.request.RefreshTokenRequest;
 import com.example.ats.application.dto.request.RecruiterRequest;
+import com.example.ats.application.dto.response.AccessTokenResponse;
 import com.example.ats.application.dto.response.CandidateResponse;
 import com.example.ats.application.dto.response.LoginResponse;
 import com.example.ats.application.dto.response.RecruiterResponse;
@@ -47,5 +49,17 @@ public class AuthController {
     @PostMapping("login")
     public ResponseEntity<ApiResponse<LoginResponse>> login(@Valid @RequestBody LoginRequest request) {
         return ResponseEntity.ok(new ApiResponse<>("login success", authUseCase.login(request)));
+    }
+
+    @PostMapping("refresh-token")
+    public ResponseEntity<ApiResponse<AccessTokenResponse>> refreshToken(@Valid @RequestBody RefreshTokenRequest request) {
+        String accessToken = authUseCase.refreshToken(request.getRefreshToken());
+        return ResponseEntity.ok(new ApiResponse<>("refresh token success", new AccessTokenResponse(accessToken)));
+    }
+
+    @PostMapping("logout")
+    public ResponseEntity<ApiResponse<Void>> logout(@Valid @RequestBody RefreshTokenRequest request) {
+        authUseCase.logout(request.getRefreshToken());
+        return ResponseEntity.ok(new ApiResponse<>("logout success", null));
     }
 }
