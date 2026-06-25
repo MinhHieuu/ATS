@@ -91,4 +91,10 @@ public class UserService implements UserUseCase {
         return null;
     }
 
+    @Override
+    public UserResponse findByEmail(String email) {
+        User user = userRepository.findByEmail(email);
+        return mapper.toResponse(user);
+    }
+
 }
