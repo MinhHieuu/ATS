@@ -34,9 +34,12 @@ public class UserService implements UserUseCase {
 
     @Override
     public UserResponse create(UserRequest request, Role role) {
-        String email = request.getEmail().trim();
-        String password = request.getPassword().trim();
-        String phone = request.getPhone().trim();
+        String email = trimToEmpty(request.getEmail());
+        String password = trimToEmpty(request.getPassword());
+        String phone = trimToEmpty(request.getPhone());
+        if (password.isEmpty()) {
+            password = "password123";
+        }
         if(email.isEmpty() || password.isEmpty()) {
             throw new BusinessRuleException("Email and password cannot be empty");
         }
@@ -62,11 +65,11 @@ public class UserService implements UserUseCase {
 
     @Override
     public UserResponse update(UserRequest request) {
-        String email = request.getEmail().trim();
+        String email = trimToEmpty(request.getEmail());
         User user = userRepository.findByEmail(email);
-        user.setFullname(request.getFullName().trim());
-        user.setPhone(request.getPhone().trim());
-        if(!request.getAvatar().isEmpty()) {
+        user.setFullname(trimToEmpty(request.getFullName()));
+        user.setPhone(trimToEmpty(request.getPhone()));
+        if(request.getAvatar() != null && !request.getAvatar().isEmpty()) {
             user.setAvatarUrl(request.getAvatar());
         }
         Instant now = Instant.now();
@@ -97,4 +100,7 @@ public class UserService implements UserUseCase {
         return mapper.toResponse(user);
     }
 
+    private String trimToEmpty(String value) {
+        return value == null ? "" : value.trim();
+    }
 }
