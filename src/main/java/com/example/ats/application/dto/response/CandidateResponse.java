@@ -22,4 +22,15 @@ public class CandidateResponse{
         private Instant createdAt;
         private Instant updatedAt;
 
+        public String getEmail() {
+                return user == null ? null : user.getEmail();
+        }
+
+        public String getFullname() {
+                return user == null ? null : user.getFullname();
+        }
+
+        public String getPhone() {
+                return user == null ? null : user.getPhone();
+        }
 }

@@ -5,6 +5,7 @@ import com.example.ats.application.dto.response.CandidateResponse;
 import com.example.ats.application.port.in.CandidateUseCase;
 import com.example.ats.domain.model.ApiResponse;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,6 +18,12 @@ public class CandidateController {
 
     public CandidateController(CandidateUseCase candidateUseCase) {
         this.candidateUseCase = candidateUseCase;
+    }
+
+    @PostMapping("")
+    public ResponseEntity<ApiResponse<CandidateResponse>> create(@Valid @RequestBody CandidateRequest request) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(new ApiResponse<>("create success", candidateUseCase.create(request)));
     }
 
     @GetMapping("")
