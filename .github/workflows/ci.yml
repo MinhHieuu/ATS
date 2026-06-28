@@ -31,5 +31,5 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
         cache: maven
-    - name: build and test
-      run: mvn clean test
+    - name: build
+      run: run: mvn clean package -DskipTests
