@@ -32,4 +32,4 @@ jobs:
         distribution: 'temurin'
         cache: maven
     - name: build
-      run: run: mvn clean package -DskipTests
+      run: mvn clean package -DskipTests
