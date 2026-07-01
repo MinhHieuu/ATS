@@ -8,5 +8,6 @@ import java.util.List;
 public interface RecruiterRepository {
     Recruiter save(Recruiter recruiter);
     Recruiter findById(Long id);
+    Recruiter findByUserId(Long userId);
     List<RecruiterResult> findAllWithUser();
 }

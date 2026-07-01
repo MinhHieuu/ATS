@@ -45,6 +45,12 @@ public class CandidateAdapter implements CandidateRepository {
     }
 
     @Override
+    public Candidate findByUserId(Long userId) {
+        return toCandidate(repository.findByUserId(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Candidate not found")));
+    }
+
+    @Override
     public List<CandidateResult> findAllWithUser() {
         return repository.findAllWithUser().stream()
                 .map(entity -> new CandidateResult(

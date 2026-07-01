@@ -54,8 +54,8 @@ public class RecruiterService implements RecruiterUseCase {
 
     @Override
     public RecruiterResponse update(RecruiterRequest request, Long id) {
-        UserResponse user = userUseCase.update(request);
         Recruiter recruiter = repository.findById(id);
+        UserResponse user = userUseCase.update(recruiter.getUserId(), request);
         recruiter.setCompanyId(request.getCompanyId());
         recruiter.setPosition(request.getPosition());
         repository.save(recruiter);
@@ -70,6 +70,11 @@ public class RecruiterService implements RecruiterUseCase {
     @Override
     public RecruiterResponse findById(Long id) {
         return toResponse(repository.findById(id));
+    }
+
+    @Override
+    public RecruiterResponse findByUserId(Long userId) {
+        return toResponse(repository.findByUserId(userId));
     }
 
     @Override

@@ -19,6 +19,9 @@ import java.util.UUID;
 
 @Service
 public class JWTService {
+    private static final String ACCESS_TOKEN_TYPE = "ACCESS";
+    private static final String REFRESH_TOKEN_TYPE = "REFRESH";
+
     @Value("${jwt.secret-key}")
     private String secret;
     @Value("${jwt.access-expiration}")
@@ -26,8 +29,13 @@ public class JWTService {
     @Value("${jwt.refresh-expiration}")
     private long refreshExpiration;
 
-    private String generateToken(Long userId, Role role, Long expiration) {
-        Map<String, Object> claims = Map.of("userId", userId, "role", role, "jti", UUID.randomUUID().toString());
+    private String generateToken(Long userId, Role role, Long expiration, String tokenType) {
+        Map<String, Object> claims = Map.of(
+                "userId", userId,
+                "role", role,
+                "type", tokenType,
+                "jti", UUID.randomUUID().toString()
+        );
         return Jwts.builder()
                 .setClaims(claims)
                 .setIssuedAt(Date.from(Instant.now()))
@@ -49,24 +57,16 @@ public class JWTService {
     }
 
     public String generateRefreshToken(Long userId, Role role) {
-        return generateToken(userId, role, refreshExpiration);
+        return generateToken(userId, role, refreshExpiration, REFRESH_TOKEN_TYPE);
     }
 
     public String generateAccessToken(Long userId, Role role) {
-        return generateToken(userId, role, accessExpiration);
+        return generateToken(userId, role, accessExpiration, ACCESS_TOKEN_TYPE);
     }
 
     public Long getUserIdFromRefreshToken(String token) {
         try {
-            if (token == null || token.isBlank()) {
-                throw new IllegalArgumentException("Invalid refresh token");
-            }
-            Claims claims = getClaims(token);
-            Number userId = claims.get("userId", Number.class);
-            if (userId == null) {
-                throw new IllegalArgumentException("Invalid refresh token");
-            }
-            return userId.longValue();
+            return getUserId(token, REFRESH_TOKEN_TYPE);
         } catch (JwtException | IllegalArgumentException e) {
             throw new BusinessRuleException("Invalid refresh token");
         }
@@ -77,7 +77,7 @@ public class JWTService {
             if (token == null || token.isBlank()) {
                 throw new IllegalArgumentException("Invalid refresh token");
             }
-            return getClaims(token).getExpiration().toInstant();
+            return getValidatedClaims(token, REFRESH_TOKEN_TYPE).getExpiration().toInstant();
         } catch (JwtException | IllegalArgumentException e) {
             throw new BusinessRuleException("Invalid refresh token");
         }
@@ -85,6 +85,49 @@ public class JWTService {
 
     public String refreshAccessToken(String token, Role role) {
         Long userId = getUserIdFromRefreshToken(token);
-        return generateToken(userId, role, accessExpiration);
+        return generateToken(userId, role, accessExpiration, ACCESS_TOKEN_TYPE);
+    }
+
+    public Long getUserIdFromToken(String token) {
+        return getUserId(token, ACCESS_TOKEN_TYPE);
+    }
+
+    private Long getUserId(String token, String expectedTokenType) {
+        Claims claims = getValidatedClaims(token, expectedTokenType);
+        Number userId = claims.get("userId", Number.class);
+        if (userId == null) {
+            throw new IllegalArgumentException("Invalid token");
+        }
+        return userId.longValue();
+    }
+
+    public Role getRoleFromToken(String token) {
+        Claims claims = getValidatedClaims(token, ACCESS_TOKEN_TYPE);
+        String role = claims.get("role", String.class);
+        if (role == null || role.isBlank()) {
+            throw new IllegalArgumentException("Invalid access token");
+        }
+        return Role.valueOf(role);
+    }
+
+    public boolean isTokenValid(String token) {
+        try {
+            getValidatedClaims(token, ACCESS_TOKEN_TYPE);
+            return true;
+        } catch (JwtException | IllegalArgumentException e) {
+            return false;
+        }
+    }
+
+    private Claims getValidatedClaims(String token, String expectedTokenType) {
+        if (token == null || token.isBlank()) {
+            throw new IllegalArgumentException("Invalid token");
+        }
+        Claims claims = getClaims(token);
+        String tokenType = claims.get("type", String.class);
+        if (!expectedTokenType.equals(tokenType)) {
+            throw new IllegalArgumentException("Invalid token type");
+        }
+        return claims;
     }
 }

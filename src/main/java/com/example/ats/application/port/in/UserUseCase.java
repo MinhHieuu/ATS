@@ -10,6 +10,7 @@ public interface UserUseCase {
     UserResponse create(UserRequest request, Role role);
     UserResponse findById(Long id);
     UserResponse update(UserRequest request);
+    UserResponse update(Long id, UserRequest request);
     Void changePassword(Long id, ChangePasswordRequest request);
     UserResponse findByEmail(String email);
 }

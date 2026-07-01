@@ -5,7 +5,7 @@ Tai lieu nay mo ta request va response tra ve cho tung API hien co trong project
 - Base URL mac dinh: `http://localhost:8080`
 - Content-Type mac dinh: `application/json`
 - Rieng API upload file dung: `multipart/form-data`
-- Theo `SecurityConfig` hien tai, tat ca API dang `permitAll()`.
+- Theo `SecurityConfig` hien tai, cac API public gom `OPTIONS /**`, `/api/auth/register`, `/api/auth/register/recruiter`, `/api/auth/login`, `/api/auth/refresh-token`, `/uploads/**`. Cac API con lai can access token hop le.
 
 ## Response format chung
 
@@ -234,7 +234,7 @@ Response thanh cong: `200 OK`
 
 `POST /api/auth/logout`
 
-Dang xuat bang refresh token.
+Dang xuat bang refresh token. Endpoint nay can access token hop le.
 
 Request body:
 
@@ -335,13 +335,7 @@ Response thanh cong: `200 OK`
 
 `GET /api/candidates/profile`
 
-Lay thong tin profile cua candidate theo `id`.
-
-Request hien tai trong code:
-
-| Param | Ghi chu |
-|---|---|
-| `id` | Method co tham so `Long id`, nhung chua gan `@RequestParam`, `@PathVariable` hoac lay tu user dang dang nhap |
+Lay thong tin profile cua candidate theo user dang dang nhap. Code hien tai lay `userId` tu `Authentication`, nen request can access token hop le va khong can gui `id`.
 
 Response thanh cong: `200 OK`
 
@@ -372,7 +366,7 @@ Response thanh cong: `200 OK`
 
 `PATCH /api/candidates`
 
-Cap nhat thong tin candidate. Code hien tai dang hard-code `id = 1L`.
+Cap nhat thong tin candidate cua user dang dang nhap. Code hien tai lay `userId` tu `Authentication`, nen request can access token hop le va khong can gui `id`.
 
 Request body:
 
@@ -458,15 +452,15 @@ Response thanh cong: `200 OK`
 }
 ```
 
-### 2. Lay recruiter theo id
+### 2. Lay recruiter theo userId
 
-`GET /api/recruiters/{id}`
+`GET /api/recruiters/{userId}`
 
 Path variable:
 
 | Param | Type | Mo ta |
 |---|---|---|
-| `id` | `Long` | ID recruiter |
+| `userId` | `Long` | ID user cua recruiter |
 
 Response thanh cong: `200 OK`
 
@@ -709,7 +703,7 @@ Base path: `/api/users`
 
 `PATCH /api/users/password`
 
-Doi mat khau user. Code hien tai co tham so `Long id` nhung chua co annotation va dang hard-code `id = 1L`.
+Doi mat khau user dang dang nhap. Code hien tai lay `userId` tu `Authentication`, nen request can access token hop le va khong can gui `id`.
 
 Request body:
 
@@ -765,14 +759,16 @@ Response thanh cong: `201 Created`
 
 ```json
 {
-  "originalName": "resume.pdf",
-  "storedName": "20260627100000-resume.pdf",
-  "url": "http://localhost:8080/uploads/20260627100000-resume.pdf",
-  "size": 123456
+  "message": "create file success",
+  "data": "20260627100000-resume.pdf"
 }
 ```
 
-Ghi chu: API upload file tra ve truc tiep `UploadResponse`, khong boc trong `ApiResponse`.
+Ghi chu:
+
+- API upload file tra ve `ApiResponse<String>`.
+- `data` la ten file cuoi cung duoc luu vao database.
+- Neu file empty, `data` tra ve chuoi rong `""`.
 
 ## Resume API
 
@@ -1081,7 +1077,7 @@ Enum `entityType`: `JOB`, `APPLICATION`, `INTERVIEW`, `CANDIDATE`, `USER`.
 | `GET` | `/api/candidates/profile` | Lay profile candidate |
 | `PATCH` | `/api/candidates` | Cap nhat candidate |
 | `GET` | `/api/recruiters` | Lay danh sach recruiter |
-| `GET` | `/api/recruiters/{id}` | Lay recruiter theo id |
+| `GET` | `/api/recruiters/{userId}` | Lay recruiter theo userId |
 | `PATCH` | `/api/recruiters/{id}` | Cap nhat recruiter |
 | `POST` | `/api/companies` | Tao company |
 | `GET` | `/api/companies` | Lay danh sach company |

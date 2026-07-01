@@ -41,7 +41,7 @@ Base path: `/api/recruiters`
 | Method | Endpoint | Body / Param chinh | Tac dung | Response chinh |
 |---|---|---|---|---|
 | `GET` | `/api/recruiters` | Khong co | Lay danh sach tat ca nha tuyen dung. | `List<RecruiterResponse>` |
-| `GET` | `/api/recruiters/{id}` | Path variable `id` | Lay chi tiet mot nha tuyen dung theo id. | `RecruiterResponse` |
+| `GET` | `/api/recruiters/{userId}` | Path variable `userId` | Lay chi tiet mot nha tuyen dung theo userId. | `RecruiterResponse` |
 | `PATCH` | `/api/recruiters/{id}` | Path variable `id`; body gom `fullName`, `email`, `phone`, `password`, `avatar`, `companyId`, `position` | Cap nhat thong tin nha tuyen dung va thong tin user lien quan. | `RecruiterResponse` |
 
 ## 4. Company API
@@ -69,7 +69,7 @@ Base path: `/api/files`
 
 | Method | Endpoint | Body / Param chinh | Tac dung | Response chinh |
 |---|---|---|---|---|
-| `POST` | `/api/files/upload` | `multipart/form-data` voi field `file` | Upload file len storage cua server, phu hop de upload avatar, CV/resume hoac tai lieu lien quan. | `UploadResponse` gom `originalName`, `storedName`, `url`, `size` |
+| `POST` | `/api/files/upload` | `multipart/form-data` voi field `file` | Upload file len storage cua server, phu hop de upload avatar, CV/resume hoac tai lieu lien quan. | `ApiResponse<String>` voi `data` la ten file luu DB; file empty tra `data: ""` |
 
 ## 7. Resume API
 

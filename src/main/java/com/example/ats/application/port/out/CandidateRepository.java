@@ -8,6 +8,7 @@ import java.util.List;
 public interface CandidateRepository {
     Candidate save(Candidate candidate);
     Candidate findById(Long id);
+    Candidate findByUserId(Long userId);
     List<CandidateResult> findAllWithUser();
 }
 

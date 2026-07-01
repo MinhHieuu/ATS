@@ -49,9 +49,21 @@ public class CandidateService implements CandidateUseCase {
 
     @Override
     public CandidateResponse update(CandidateRequest request, Long id) {
-        UserResponse user = userUseCase.update(request);
         Instant now = Instant.now();
         Candidate candidate = repository.findById(id);
+        UserResponse user = userUseCase.update(candidate.getUserId(), request);
+        return updateCandidate(request, user, now, candidate);
+    }
+
+    @Override
+    public CandidateResponse updateByUserId(CandidateRequest request, Long userId) {
+        Instant now = Instant.now();
+        Candidate candidate = repository.findByUserId(userId);
+        UserResponse user = userUseCase.update(userId, request);
+        return updateCandidate(request, user, now, candidate);
+    }
+
+    private CandidateResponse updateCandidate(CandidateRequest request, UserResponse user, Instant now, Candidate candidate) {
         candidate.setLinkedinUrl(request.getLinkedinUrl());
         candidate.setGithubUrl(request.getGithubUrl());
         candidate.setPortfolioUrl(request.getPortfolioUrl());
@@ -67,6 +79,11 @@ public class CandidateService implements CandidateUseCase {
     @Override
     public CandidateResponse findById(Long id) {
         return toResponse(repository.findById(id));
+    }
+
+    @Override
+    public CandidateResponse findByUserId(Long userId) {
+        return toResponse(repository.findByUserId(userId));
     }
 
     @Override

@@ -25,22 +25,42 @@ class ApplicationFlowIntegrationTest {
 
     @Test
     void candidateCanApplyToAnOpenJob() throws Exception {
-        String candidateJson = mockMvc.perform(post("/api/candidates")
+        String suffix = String.valueOf(System.currentTimeMillis() % 1_000_000_000);
+        String email = "lan" + suffix + "@example.com";
+        String phone = "09" + suffix;
+
+        String candidateJson = mockMvc.perform(post("/api/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
                                   "fullName": "Lan Nguyen",
-                                  "email": "lan@example.com",
-                                  "phone": "0901234567",
+                                  "email": "%s",
+                                  "phone": "%s",
+                                  "password": "password123",
                                   "currentPosition": "Java Fresher",
                                   "yearsOfExperience": 0
                                 }
-                                """))
+                                """.formatted(email, phone)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.email").value("lan@example.com"))
+                .andExpect(jsonPath("$.data.email").value(email))
                 .andReturn().getResponse().getContentAsString();
 
+        String loginJson = mockMvc.perform(post("/api/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "email": "%s",
+                                  "password": "password123"
+                                }
+                                """.formatted(email)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.accessToken").isString())
+                .andReturn().getResponse().getContentAsString();
+
+        String accessToken = objectMapper.readTree(loginJson).get("data").get("accessToken").asText();
+
         String jobJson = mockMvc.perform(post("/api/jobs")
+                        .header("Authorization", "Bearer " + accessToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
@@ -54,13 +74,14 @@ class ApplicationFlowIntegrationTest {
                                 }
                                 """))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.status").value("OPEN"))
+                .andExpect(jsonPath("$.data.status").value("OPEN"))
                 .andReturn().getResponse().getContentAsString();
 
-        JsonNode candidate = objectMapper.readTree(candidateJson);
-        JsonNode job = objectMapper.readTree(jobJson);
+        JsonNode candidate = objectMapper.readTree(candidateJson).get("data");
+        JsonNode job = objectMapper.readTree(jobJson).get("data");
 
         mockMvc.perform(post("/api/applications")
+                        .header("Authorization", "Bearer " + accessToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
@@ -70,11 +91,12 @@ class ApplicationFlowIntegrationTest {
                                 }
                                 """.formatted(candidate.get("id").asText(), job.get("id").asText())))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.status").value("APPLIED"));
+                .andExpect(jsonPath("$.data.status").value("APPLIED"));
 
         mockMvc.perform(get("/api/applications")
+                        .header("Authorization", "Bearer " + accessToken)
                         .param("candidateId", candidate.get("id").asText()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].jobId").value(job.get("id").asLong()));
+                .andExpect(jsonPath("$.data[0].jobId").value(job.get("id").asLong()));
     }
 }

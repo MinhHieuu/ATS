@@ -22,9 +22,9 @@ public class FileStorageService {
         this.publicPath = normalizePublicPath(properties.publicPath());
     }
 
-    public StoredFile store(MultipartFile file) {
+    public String store(MultipartFile file) {
         if (file.isEmpty()) {
-            throw new IllegalArgumentException("File upload must not be empty");
+            return "";
         }
 
         String originalName = StringUtils.cleanPath(
@@ -47,7 +47,7 @@ public class FileStorageService {
             throw new FileStorageException("Could not store uploaded file", exception);
         }
 
-        return new StoredFile(originalName, storedName, publicPath + "/" + storedName, file.getSize());
+        return storedName;
     }
 
     private String getExtension(String fileName) {
@@ -60,14 +60,6 @@ public class FileStorageService {
         return normalized.endsWith("/")
                 ? normalized.substring(0, normalized.length() - 1)
                 : normalized;
-    }
-
-    public record StoredFile(
-            String originalName,
-            String storedName,
-            String url,
-            long size
-    ) {
     }
 
     public static class FileStorageException extends RuntimeException {

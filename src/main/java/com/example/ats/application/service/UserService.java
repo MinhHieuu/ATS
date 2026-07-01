@@ -67,6 +67,16 @@ public class UserService implements UserUseCase {
     public UserResponse update(UserRequest request) {
         String email = trimToEmpty(request.getEmail());
         User user = userRepository.findByEmail(email);
+        return updateUser(request, user);
+    }
+
+    @Override
+    public UserResponse update(Long id, UserRequest request) {
+        User user = userRepository.findById(id);
+        return updateUser(request, user);
+    }
+
+    private UserResponse updateUser(UserRequest request, User user) {
         user.setFullname(trimToEmpty(request.getFullName()));
         user.setPhone(trimToEmpty(request.getPhone()));
         if(request.getAvatar() != null && !request.getAvatar().isEmpty()) {

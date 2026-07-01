@@ -11,7 +11,6 @@ import com.example.ats.application.dto.response.RecruiterResponse;
 import com.example.ats.application.port.in.AuthUseCase;
 import com.example.ats.application.port.in.CandidateUseCase;
 import com.example.ats.application.port.in.RecruiterUseCase;
-import com.example.ats.application.port.in.UserUseCase;
 import com.example.ats.domain.model.ApiResponse;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
