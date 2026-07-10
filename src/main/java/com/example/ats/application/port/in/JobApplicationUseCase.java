@@ -8,8 +8,10 @@ import java.util.List;
 
 public interface JobApplicationUseCase {
     JobApplicationResponse create(JobApplicationRequest request);
+    JobApplicationResponse apply(Long candidateUserId, JobApplicationRequest request);
     JobApplicationResponse update(Long id, JobApplicationRequest request);
     JobApplicationResponse changeStatus(Long id, ApplicationStatusRequest request);
+    JobApplicationResponse withdraw(Long id, Long candidateUserId);
     JobApplicationResponse findById(Long id);
     List<JobApplicationResponse> findAll();
     List<JobApplicationResponse> findByCandidate(Long candidateId);

@@ -5,6 +5,8 @@ import com.example.ats.application.dto.response.InterviewFeedbackResponse;
 import com.example.ats.application.mapper.InterviewFeedbackMapper;
 import com.example.ats.application.port.in.InterviewFeedbackUseCase;
 import com.example.ats.application.port.out.InterviewFeedbackRepository;
+import com.example.ats.domain.model.ActivityAction;
+import com.example.ats.domain.model.EntityType;
 import com.example.ats.domain.model.InterviewFeedback;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,17 +19,23 @@ import java.util.List;
 public class InterviewFeedbackService implements InterviewFeedbackUseCase {
     private final InterviewFeedbackRepository repository;
     private final InterviewFeedbackMapper mapper;
+    private final ActivityLogRecorder activityLogRecorder;
 
-    public InterviewFeedbackService(InterviewFeedbackRepository repository, InterviewFeedbackMapper mapper) {
+    public InterviewFeedbackService(InterviewFeedbackRepository repository, InterviewFeedbackMapper mapper,
+                                    ActivityLogRecorder activityLogRecorder) {
         this.repository = repository;
         this.mapper = mapper;
+        this.activityLogRecorder = activityLogRecorder;
     }
 
     @Override
     public InterviewFeedbackResponse create(InterviewFeedbackRequest request) {
         InterviewFeedback feedback = new InterviewFeedback(null, request.getInterviewId(), request.getRecruiterId(),
                 request.getRating(), request.getComment(), request.getRecommendation(), Instant.now());
-        return mapper.toResponse(repository.save(feedback));
+        InterviewFeedback savedFeedback = repository.save(feedback);
+        activityLogRecorder.record(ActivityAction.CREATE, EntityType.INTERVIEW, savedFeedback.getInterviewId(),
+                "Thêm đánh giá phỏng vấn #" + savedFeedback.getInterviewId());
+        return mapper.toResponse(savedFeedback);
     }
 
     @Override
@@ -38,7 +46,10 @@ public class InterviewFeedbackService implements InterviewFeedbackUseCase {
         feedback.setRating(request.getRating());
         feedback.setComment(request.getComment());
         feedback.setRecommendation(request.getRecommendation());
-        return mapper.toResponse(repository.save(feedback));
+        InterviewFeedback savedFeedback = repository.save(feedback);
+        activityLogRecorder.record(ActivityAction.UPDATE, EntityType.INTERVIEW, savedFeedback.getInterviewId(),
+                "Cập nhật đánh giá phỏng vấn #" + savedFeedback.getInterviewId());
+        return mapper.toResponse(savedFeedback);
     }
 
     @Override
@@ -55,6 +66,9 @@ public class InterviewFeedbackService implements InterviewFeedbackUseCase {
 
     @Override
     public void delete(Long id) {
+        InterviewFeedback feedback = repository.findById(id);
         repository.deleteById(id);
+        activityLogRecorder.record(ActivityAction.DELETE, EntityType.INTERVIEW, feedback.getInterviewId(),
+                "Xóa đánh giá phỏng vấn #" + feedback.getInterviewId());
     }
 }

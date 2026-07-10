@@ -60,11 +60,6 @@ public class RecruiterAdapter implements RecruiterRepository {
                 .orElseThrow(() -> new ResourceNotFoundException("Recruiter not found")));
     }
 
-    @Override
-    public Recruiter findByUserId(Long userId) {
-        return toRecruiter(repository.findByUserId(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("Recruiter not found with user id: " + userId)));
-    }
 
     @Override
     public List<RecruiterResult> findAllWithUser() {

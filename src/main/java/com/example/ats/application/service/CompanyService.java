@@ -35,7 +35,8 @@ public class CompanyService implements CompanyUseCase {
                 request.getDescription(),
                 request.getAddress(),
                 now,
-                null));
+                null,
+                true));
         return mapper.toResponse(company);
     }
 
@@ -53,6 +54,14 @@ public class CompanyService implements CompanyUseCase {
     }
 
     @Override
+    public CompanyResponse deactivate(Long id) {
+        Company company = repository.findById(id);
+        company.setIsActive(false);
+        company.setUpdatedAt(Instant.now());
+        return mapper.toResponse(repository.save(company));
+    }
+
+    @Override
     public CompanyResponse findById(Long id) {
         return mapper.toResponse(repository.findById(id));
     }
@@ -60,6 +69,14 @@ public class CompanyService implements CompanyUseCase {
     @Override
     public List<CompanyResponse> findAll() {
         return repository.findAll().stream()
+                .map(mapper::toResponse)
+                .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<CompanyResponse> findActive() {
+        return repository.findActive().stream()
                 .map(mapper::toResponse)
                 .toList();
     }

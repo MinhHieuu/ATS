@@ -49,7 +49,9 @@ public class SecurityConfig {
                                 "/api/auth/register/recruiter",
                                 "/api/auth/login",
                                 "/api/auth/refresh-token",
-                                "/uploads/**"
+                                "/uploads/**",
+                                "/api/companies/active",
+                                "/ws/**"
                         ).permitAll()
                         .anyRequest().authenticated())
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);

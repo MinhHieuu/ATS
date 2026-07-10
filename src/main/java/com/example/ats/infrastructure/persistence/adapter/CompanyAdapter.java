@@ -31,7 +31,8 @@ public class CompanyAdapter implements CompanyRepository {
                 company.getDescription(),
                 company.getAddress(),
                 company.getCreatedAt(),
-                company.getUpdatedAt())));
+                company.getUpdatedAt(),
+                company.getIsActive())));
     }
 
     @Override
@@ -43,6 +44,13 @@ public class CompanyAdapter implements CompanyRepository {
     @Override
     public List<Company> findAll() {
         return repository.findAll().stream()
+                .map(mapper::toEntity)
+                .toList();
+    }
+
+    @Override
+    public List<Company> findActive() {
+        return repository.findByIsActiveTrue().stream()
                 .map(mapper::toEntity)
                 .toList();
     }

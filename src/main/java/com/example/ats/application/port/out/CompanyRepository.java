@@ -8,4 +8,5 @@ public interface CompanyRepository {
     Company save(Company company);
     Company findById(Long id);
     List<Company> findAll();
+    List<Company> findActive();
 }

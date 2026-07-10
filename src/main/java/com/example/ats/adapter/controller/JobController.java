@@ -4,9 +4,11 @@ import com.example.ats.application.dto.request.JobRequest;
 import com.example.ats.application.dto.response.JobResponse;
 import com.example.ats.application.port.in.JobUseCase;
 import com.example.ats.domain.model.ApiResponse;
+import com.example.ats.domain.model.User;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -21,7 +23,10 @@ public class JobController {
     }
 
     @PostMapping
-    public ResponseEntity<ApiResponse<JobResponse>> create(@Valid @RequestBody JobRequest request) {
+    public ResponseEntity<ApiResponse<JobResponse>> create(Authentication authentication,
+                                                           @Valid @RequestBody JobRequest request) {
+        Long userId = ((User) authentication.getPrincipal()).getId();
+        request.setCreatedBy(userId);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(new ApiResponse<>("create success", jobUseCase.create(request)));
     }

@@ -45,7 +45,7 @@ public class JobApplicationAdapter implements JobApplicationRepository {
         ApplicationStageEntity stage = application.getStageId() == null ? null : stageRepository.findById(application.getStageId())
                 .orElseThrow(() -> new ResourceNotFoundException("Application stage not found"));
         ApplicationEntity entity = new ApplicationEntity(application.getId(), candidate, job, stage,
-                application.getStatus(), application.getExpectedSalary(), application.getNote(),
+                application.getStatus(), application.getSource(), application.getExpectedSalary(), application.getNote(),
                 application.getAppliedAt(), application.getUpdatedAt(), null);
         return mapper.toDomain(repository.save(entity));
     }

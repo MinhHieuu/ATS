@@ -41,9 +41,12 @@ public class AuthService implements AuthUseCase {
         if(email.isEmpty() || password.isEmpty()) {
             throw new BusinessRuleException("email or password not empty");
         }
-        User user = userRepository.findByEmail(request.getEmail());
-        if(!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+        User user = userRepository.findByEmail(email);
+        if(!passwordEncoder.matches(password, user.getPassword())) {
             throw new ResourceNotFoundException("email or password incorrect");
+        }
+        if (!Boolean.TRUE.equals(user.getActive())) {
+            throw new BusinessRuleException("User is inactive");
         }
         String accessToken = jwtService.generateAccessToken(user.getId(), user.getRole());
         String refreshToken = jwtService.generateRefreshToken(user.getId(), user.getRole());

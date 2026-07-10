@@ -54,7 +54,7 @@ public class UserService implements UserUseCase {
             throw new BusinessRuleException("Phone already exists");
         }
         Instant now = Instant.now();
-        return mapper.toResponse(userRepository.save(new User(null, email, request.getFullName(), encode.encode(password),
+        return mapper.toResponse(userRepository.save(new User(null, email, request.getFullname(), encode.encode(password),
          request.getPhone(), "default-avatar.png", true, now, null, role)));
     }
 
@@ -77,7 +77,7 @@ public class UserService implements UserUseCase {
     }
 
     private UserResponse updateUser(UserRequest request, User user) {
-        user.setFullname(trimToEmpty(request.getFullName()));
+        user.setFullname(trimToEmpty(request.getFullname()));
         user.setPhone(trimToEmpty(request.getPhone()));
         if(request.getAvatar() != null && !request.getAvatar().isEmpty()) {
             user.setAvatarUrl(request.getAvatar());
@@ -90,16 +90,19 @@ public class UserService implements UserUseCase {
     @Override
     public Void changePassword(Long id, ChangePasswordRequest request) {
         User user = userRepository.findById(id);
-        if(!encode.matches(request.getOldPassword(), user.getPassword())) {
+        String oldPassword = trimToEmpty(request.getOldPassword());
+        String newPassword = trimToEmpty(request.getNewPassword());
+        String confirmPassword = trimToEmpty(request.getConfirmPassword());
+        if(!encode.matches(oldPassword, user.getPassword())) {
             throw new BusinessRuleException("Old password does not match");
         }
-        if(encode.matches(request.getNewPassword(), user.getPassword())) {
+        if(encode.matches(newPassword, user.getPassword())) {
             throw new BusinessRuleException("New password must be different from old password");
         }
-        if(!request.getNewPassword().equals(request.getConfirmPassword())) {
+        if(!newPassword.equals(confirmPassword)) {
             throw new BusinessRuleException("Confirm password does not match");
         }
-        user.setPassword(encode.encode(request.getNewPassword()));
+        user.setPassword(encode.encode(newPassword));
         userRepository.save(user);
         return null;
     }

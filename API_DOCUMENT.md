@@ -158,7 +158,8 @@ Response thanh cong: `201 Created`
       "description": "Software company",
       "address": "Ho Chi Minh City",
       "createdAt": "2026-06-27T10:00:00Z",
-      "updatedAt": "2026-06-27T10:00:00Z"
+      "updatedAt": "2026-06-27T10:00:00Z",
+      "isActive": true
     },
     "position": "HR Manager"
   }
@@ -444,7 +445,8 @@ Response thanh cong: `200 OK`
         "description": "Software company",
         "address": "Ho Chi Minh City",
         "createdAt": "2026-06-27T10:00:00Z",
-        "updatedAt": "2026-06-27T10:00:00Z"
+        "updatedAt": "2026-06-27T10:00:00Z",
+        "isActive": true
       },
       "position": "HR Manager"
     }
@@ -485,7 +487,8 @@ Response thanh cong: `200 OK`
       "description": "Software company",
       "address": "Ho Chi Minh City",
       "createdAt": "2026-06-27T10:00:00Z",
-      "updatedAt": "2026-06-27T10:00:00Z"
+      "updatedAt": "2026-06-27T10:00:00Z",
+      "isActive": true
     },
     "position": "HR Manager"
   }
@@ -539,7 +542,8 @@ Response thanh cong: `200 OK`
       "description": "Software company",
       "address": "Ho Chi Minh City",
       "createdAt": "2026-06-27T10:00:00Z",
-      "updatedAt": "2026-06-27T10:00:00Z"
+      "updatedAt": "2026-06-27T10:00:00Z",
+      "isActive": true
     },
     "position": "Senior HR Manager"
   }
@@ -592,7 +596,8 @@ Response thanh cong: `201 Created`
     "description": "Software company",
     "address": "Ho Chi Minh City",
     "createdAt": "2026-06-27T10:00:00Z",
-    "updatedAt": "2026-06-27T10:00:00Z"
+    "updatedAt": "2026-06-27T10:00:00Z",
+    "isActive": true
   }
 }
 ```
@@ -618,13 +623,44 @@ Response thanh cong: `200 OK`
       "description": "Software company",
       "address": "Ho Chi Minh City",
       "createdAt": "2026-06-27T10:00:00Z",
-      "updatedAt": "2026-06-27T10:00:00Z"
+      "updatedAt": "2026-06-27T10:00:00Z",
+      "isActive": true
     }
   ]
 }
 ```
 
-### 3. Lay company theo id
+### 3. Lay danh sach company active
+
+`GET /api/companies/active`
+
+Lay danh sach cong ty dang active, chi tra ve company co `isActive = true`.
+
+Request: khong co body.
+
+Response thanh cong: `200 OK`
+
+```json
+{
+  "message": "success",
+  "data": [
+    {
+      "id": 1,
+      "name": "ABC Company",
+      "logo": "https://example.com/logo.png",
+      "email": "contact@abc.com",
+      "website": "https://abc.com",
+      "description": "Software company",
+      "address": "Ho Chi Minh City",
+      "createdAt": "2026-06-27T10:00:00Z",
+      "updatedAt": "2026-06-27T10:00:00Z",
+      "isActive": true
+    }
+  ]
+}
+```
+
+### 4. Lay company theo id
 
 `GET /api/companies/{id}`
 
@@ -648,12 +684,13 @@ Response thanh cong: `200 OK`
     "description": "Software company",
     "address": "Ho Chi Minh City",
     "createdAt": "2026-06-27T10:00:00Z",
-    "updatedAt": "2026-06-27T10:00:00Z"
+    "updatedAt": "2026-06-27T10:00:00Z",
+    "isActive": true
   }
 }
 ```
 
-### 4. Cap nhat company
+### 5. Cap nhat company
 
 `PATCH /api/companies/{id}`
 
@@ -690,7 +727,42 @@ Response thanh cong: `200 OK`
     "description": "Updated company description",
     "address": "Ha Noi",
     "createdAt": "2026-06-27T10:00:00Z",
-    "updatedAt": "2026-06-27T10:05:00Z"
+    "updatedAt": "2026-06-27T10:05:00Z",
+    "isActive": true
+  }
+}
+```
+
+### 6. Vo hieu hoa company
+
+`PATCH /api/companies/{id}/deactivate`
+
+Doi trang thai cong ty ve inactive bang cach cap nhat `isActive = false`.
+
+Path variable:
+
+| Param | Type | Mo ta |
+|---|---|---|
+| `id` | `Long` | ID company |
+
+Request: khong co body.
+
+Response thanh cong: `200 OK`
+
+```json
+{
+  "message": "success",
+  "data": {
+    "id": 1,
+    "name": "ABC Company",
+    "logo": "https://example.com/logo.png",
+    "email": "contact@abc.com",
+    "website": "https://abc.com",
+    "description": "Software company",
+    "address": "Ho Chi Minh City",
+    "createdAt": "2026-06-27T10:00:00Z",
+    "updatedAt": "2026-06-27T10:05:00Z",
+    "isActive": false
   }
 }
 ```
@@ -729,6 +801,50 @@ Response thanh cong: `200 OK`
 {
   "message": "success",
   "data": null
+}
+```
+
+### 2. Cap nhat user
+
+`PATCH /api/users`
+
+Cap nhat thong tin user theo `email` trong body. Endpoint nay can access token hop le.
+
+Request body:
+
+```json
+{
+  "fullname": "Nguyen Van A Updated",
+  "email": "candidate@example.com",
+  "phone": "0901234567",
+  "password": "password123",
+  "avatar": "https://example.com/avatar-new.png"
+}
+```
+
+Validation chinh:
+
+| Field | Rule |
+|---|---|
+| `fullname` | Bat buoc, toi da 100 ky tu |
+| `email` | Bat buoc, dung dinh dang email, toi da 150 ky tu |
+| `phone` | Bat buoc, toi da 20 ky tu |
+| `password` | Toi thieu 8 ky tu neu co gui |
+
+Ghi chu: service hien tai dung `email` de tim user can cap nhat. `password` khong duoc cap nhat tai endpoint nay; dung `PATCH /api/users/password` de doi mat khau.
+
+Response thanh cong: `200 OK`
+
+```json
+{
+  "message": "success",
+  "data": {
+    "id": 1,
+    "email": "candidate@example.com",
+    "fullname": "Nguyen Van A Updated",
+    "phone": "0901234567",
+    "avatarUrl": "https://example.com/avatar-new.png"
+  }
 }
 ```
 
@@ -887,14 +1003,20 @@ Request body:
   "candidateId": 1,
   "jobId": 1,
   "stageId": 1,
-  "status": "APPLIED",
   "source": "LinkedIn",
   "expectedSalary": 1500,
   "note": "Available immediately"
 }
 ```
 
-Enum `status`: `APPLIED`, `SCREENING`, `INTERVIEW`, `OFFERED`, `HIRED`, `REJECTED`, `WITHDRAWN`.
+Ghi chu nghiep vu:
+
+- `jobId` phai la job dang `OPEN`; neu job `CLOSED` he thong tra `409 Conflict`.
+- Moi application moi luon co status ban dau `APPLICATION_CREATED`; client khong can gui `status` khi tao.
+- Mot candidate khong duoc apply trung mot job; neu trung he thong tra `409 Conflict`.
+- `source` duoc luu va tra ve trong response.
+
+Enum `status`: `APPLICATION_CREATED`, `APPLIED`, `SCREENING`, `INTERVIEW`, `OFFER`, `OFFERED`, `HIRED`, `REJECTED`, `WITHDRAWN`.
 
 Response thanh cong: `201 Created`
 
@@ -906,7 +1028,7 @@ Response thanh cong: `201 Created`
     "candidateId": 1,
     "jobId": 1,
     "stageId": 1,
-    "status": "APPLIED",
+    "status": "APPLICATION_CREATED",
     "source": "LinkedIn",
     "expectedSalary": 1500,
     "note": "Available immediately",
@@ -940,11 +1062,20 @@ Response thanh cong: `ApiResponse<List<JobApplicationResponse>>` voi message `su
 | `PATCH` | `/api/applications/{id}/status` | Doi status voi body `status`, `stageId` | `ApiResponse<JobApplicationResponse>` |
 | `DELETE` | `/api/applications/{id}` | Xoa application | `ApiResponse<Void>` voi message `delete success` |
 
+Workflow doi status hop le:
+
+```text
+APPLICATION_CREATED -> SCREENING -> INTERVIEW -> OFFER -> HIRED
+```
+
+Co the chuyen sang `REJECTED` tu cac buoc `APPLICATION_CREATED`, `SCREENING`, `INTERVIEW`, `OFFER`/`OFFERED`.
+Code van chap nhan enum cu `APPLIED` va `OFFERED` de tuong thich, nhung luong tao moi mac dinh dung `APPLICATION_CREATED`.
+
 Body doi status:
 
 ```json
 {
-  "status": "INTERVIEW",
+  "status": "SCREENING",
   "stageId": 2
 }
 ```
@@ -1081,9 +1212,12 @@ Enum `entityType`: `JOB`, `APPLICATION`, `INTERVIEW`, `CANDIDATE`, `USER`.
 | `PATCH` | `/api/recruiters/{id}` | Cap nhat recruiter |
 | `POST` | `/api/companies` | Tao company |
 | `GET` | `/api/companies` | Lay danh sach company |
+| `GET` | `/api/companies/active` | Lay danh sach company dang active |
 | `GET` | `/api/companies/{id}` | Lay company theo id |
 | `PATCH` | `/api/companies/{id}` | Cap nhat company |
+| `PATCH` | `/api/companies/{id}/deactivate` | Vo hieu hoa company |
 | `PATCH` | `/api/users/password` | Doi mat khau |
+| `PATCH` | `/api/users` | Cap nhat user |
 | `POST` | `/api/files/upload` | Upload file |
 | `POST` | `/api/resumes` | Tao resume |
 | `GET` | `/api/resumes` | Lay danh sach resume |

@@ -37,6 +37,11 @@ public class CompanyController {
         return ResponseEntity.ok(new ApiResponse<>("success", companyUseCase.findAll()));
     }
 
+    @GetMapping("active")
+    public ResponseEntity<ApiResponse<List<CompanyResponse>>> findActive() {
+        return ResponseEntity.ok(new ApiResponse<>("success", companyUseCase.findActive()));
+    }
+
     @GetMapping("{id}")
     public ResponseEntity<ApiResponse<CompanyResponse>> findById(@PathVariable Long id) {
         return ResponseEntity.ok(new ApiResponse<>("success", companyUseCase.findById(id)));
@@ -46,5 +51,10 @@ public class CompanyController {
     public ResponseEntity<ApiResponse<CompanyResponse>> update(@PathVariable Long id,
                                                                @Valid @RequestBody CompanyRequest request) {
         return ResponseEntity.ok(new ApiResponse<>("success", companyUseCase.update(request, id)));
+    }
+
+    @PatchMapping("{id}/deactivate")
+    public ResponseEntity<ApiResponse<CompanyResponse>> deactivate(@PathVariable Long id) {
+        return ResponseEntity.ok(new ApiResponse<>("success", companyUseCase.deactivate(id)));
     }
 }

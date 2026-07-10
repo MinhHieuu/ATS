@@ -72,10 +72,6 @@ public class RecruiterService implements RecruiterUseCase {
         return toResponse(repository.findById(id));
     }
 
-    @Override
-    public RecruiterResponse findByUserId(Long userId) {
-        return toResponse(repository.findByUserId(userId));
-    }
 
     @Override
     public List<RecruiterResponse> findAll() {

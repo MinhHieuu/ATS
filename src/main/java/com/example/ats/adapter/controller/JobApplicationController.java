@@ -5,9 +5,11 @@ import com.example.ats.application.dto.request.JobApplicationRequest;
 import com.example.ats.application.dto.response.JobApplicationResponse;
 import com.example.ats.application.port.in.JobApplicationUseCase;
 import com.example.ats.domain.model.ApiResponse;
+import com.example.ats.domain.model.User;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -25,6 +27,14 @@ public class JobApplicationController {
     public ResponseEntity<ApiResponse<JobApplicationResponse>> create(@Valid @RequestBody JobApplicationRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(new ApiResponse<>("create success", useCase.create(request)));
+    }
+
+    @PostMapping("apply")
+    public ResponseEntity<ApiResponse<JobApplicationResponse>> apply(Authentication authentication,
+                                                                     @Valid @RequestBody JobApplicationRequest request) {
+        Long userId = ((User) authentication.getPrincipal()).getId();
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(new ApiResponse<>("apply success", useCase.apply(userId, request)));
     }
 
     @GetMapping
@@ -64,6 +74,13 @@ public class JobApplicationController {
     public ResponseEntity<ApiResponse<JobApplicationResponse>> changeStatus(@PathVariable Long id,
                                                                             @Valid @RequestBody ApplicationStatusRequest request) {
         return ResponseEntity.ok(new ApiResponse<>("success", useCase.changeStatus(id, request)));
+    }
+
+    @PatchMapping("{id}/withdraw")
+    public ResponseEntity<ApiResponse<JobApplicationResponse>> withdraw(@PathVariable Long id,
+                                                                        Authentication authentication) {
+        Long userId = ((User) authentication.getPrincipal()).getId();
+        return ResponseEntity.ok(new ApiResponse<>("success", useCase.withdraw(id, userId)));
     }
 
     @DeleteMapping("{id}")

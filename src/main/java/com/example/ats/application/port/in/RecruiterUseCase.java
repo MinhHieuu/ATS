@@ -9,6 +9,5 @@ public interface RecruiterUseCase {
     RecruiterResponse create(RecruiterRequest request);
     RecruiterResponse update(RecruiterRequest request, Long id);
     RecruiterResponse findById(Long id);
-    RecruiterResponse findByUserId(Long userId);
     List<RecruiterResponse> findAll();
 }

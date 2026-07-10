@@ -40,9 +40,9 @@ public class UserEntity {
     @Column
     @Enumerated(EnumType.STRING)
     private Role role;
-    @OneToOne(mappedBy = "user")
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
     private CandidateEntity candidate;
-    @OneToOne(mappedBy = "user")
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
     private RecruiterEntity recruiter;
     @OneToMany(mappedBy = "user")
     private List<ActivityLogEntity> actions;

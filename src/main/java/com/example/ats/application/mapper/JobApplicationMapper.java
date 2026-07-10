@@ -23,7 +23,7 @@ public class JobApplicationMapper {
         }
         Long stageId = entity.getStage() == null ? null : entity.getStage().getId();
         return new JobApplication(entity.getId(), entity.getCandidate().getId(), entity.getJob().getId(), stageId,
-                entity.getStatus(), null, entity.getExpectedSalary(), entity.getNote(), entity.getAppliedAt(),
+                entity.getStatus(), entity.getSource(), entity.getExpectedSalary(), entity.getNote(), entity.getAppliedAt(),
                 entity.getUpdatedAt());
     }
 }

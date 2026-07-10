@@ -8,9 +8,9 @@ spring:
       max-request-size: ${MAX_UPLOAD_SIZE:10MB}
 
   datasource:
-    url: ${DB_URL:jdbc:mysql://localhost:3306/ats}
-    username: ${DB_USERNAME:root}
-    password: ${DB_PASSWORD:123456}
+    url: ${DB_URL:jdbc:mysql://ats-mysql.mysql.database.azure.com:3306/ats}
+    username: ${DB_USERNAME:minhhieu}
+    password: ${DB_PASSWORD:Admin123}
     driver-class-name: com.mysql.cj.jdbc.Driver
 
   jpa:

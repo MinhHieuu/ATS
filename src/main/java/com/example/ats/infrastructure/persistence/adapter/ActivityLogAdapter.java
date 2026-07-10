@@ -48,7 +48,7 @@ public class ActivityLogAdapter implements ActivityLogRepository {
 
     @Override
     public List<ActivityLog> findAll() {
-        return repository.findAll().stream().map(mapper::toDomain).toList();
+        return repository.findAllByOrderByCreatedAtDesc().stream().map(mapper::toDomain).toList();
     }
 
     @Override

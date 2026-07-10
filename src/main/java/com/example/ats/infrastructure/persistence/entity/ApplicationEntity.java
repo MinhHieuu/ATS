@@ -34,6 +34,8 @@ public class ApplicationEntity {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 50)
     private ApplicationStatus status;
+    @Column(length = 100)
+    private String source;
     @Column(name = "expected_salary", precision = 12, scale = 2)
     private BigDecimal expectedSalary;
     @Column(columnDefinition = "TEXT")

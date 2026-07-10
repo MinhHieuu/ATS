@@ -12,7 +12,6 @@ import java.math.BigDecimal;
 @Getter
 @Setter
 public class JobApplicationRequest {
-    @NotNull(message = "Candidate id is required")
     private Long candidateId;
 
     @NotNull(message = "Job id is required")
