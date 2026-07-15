@@ -8,6 +8,8 @@ import java.util.List;
 public interface JobUseCase {
     JobResponse create(JobRequest request);
     JobResponse update(Long id, JobRequest request);
+    JobResponse activate(Long id);
+    JobResponse deactivate(Long id);
     JobResponse findById(Long id);
     List<JobResponse> findAll();
     void delete(Long id);

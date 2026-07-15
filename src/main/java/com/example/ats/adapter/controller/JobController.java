@@ -52,4 +52,14 @@ public class JobController {
         jobUseCase.delete(id);
         return ResponseEntity.ok(new ApiResponse<>("delete success", null));
     }
+
+    @PatchMapping("{id}/deactivate")
+    public ResponseEntity<ApiResponse<JobResponse>> deactivate(@PathVariable Long id) {
+        return ResponseEntity.ok(new ApiResponse<>("success", jobUseCase.deactivate(id)));
+    }
+
+    @PatchMapping("{id}/active")
+    public ResponseEntity<ApiResponse<JobResponse>> active(@PathVariable Long id) {
+        return ResponseEntity.ok(new ApiResponse<>("success", jobUseCase.activate(id)));
+    }
 }

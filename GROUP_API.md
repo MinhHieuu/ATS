@@ -9,7 +9,7 @@ Tai lieu nay gom nhom cac API hien co trong du an ATS theo controller. Tat ca re
 }
 ```
 
-Ghi chu: theo `SecurityConfig` hien tai, cac API public gom `OPTIONS /**`, `/api/auth/register`, `/api/auth/register/recruiter`, `/api/auth/login`, `/api/auth/refresh-token`, `/uploads/**`. Cac API con lai can header `Authorization: Bearer <accessToken>`.
+Ghi chu: theo `SecurityConfig` hien tai, cac API public gom `OPTIONS /**`, `/api/auth/register`, `/api/auth/register/recruiter`, `/api/auth/login`, `/api/auth/refresh-token`, `/uploads/**`, `/api/companies/active`, `/ws/**`. Cac API con lai can header `Authorization: Bearer <accessToken>`.
 
 ## 1. Auth API
 
@@ -31,8 +31,8 @@ Base path: `/api/candidates`
 |---|---|---|---|---|
 | `POST` | `/api/candidates` | `fullName`, `email`, `phone`, `password`, `avatar`, `linkedinUrl`, `githubUrl`, `portfolioUrl`, `currentPosition`, `yearsOfExperience` | Tao ho so ung vien moi. | `CandidateResponse` |
 | `GET` | `/api/candidates` | Khong co | Lay danh sach tat ca ung vien trong he thong. | `List<CandidateResponse>` |
-| `GET` | `/api/candidates/profile` | Code hien tai nhan `Long id` nhung chua gan `@RequestParam`/`@PathVariable` | Lay ho so cua mot ung vien theo `id`. Theo code hien tai, endpoint nay co the can bo sung cach lay `id` ro rang. | `CandidateResponse` |
-| `PATCH` | `/api/candidates` | `fullName`, `email`, `phone`, `password`, `avatar`, `linkedinUrl`, `githubUrl`, `portfolioUrl`, `currentPosition`, `yearsOfExperience` | Cap nhat ho so ung vien. Code hien tai dang tam gan `id = 1L`, nen se cap nhat candidate co id bang 1. | `CandidateResponse` |
+| `GET` | `/api/candidates/profile` | Khong co (lay `userId` tu `Authentication`) | Lay ho so candidate cua user dang dang nhap. | `CandidateResponse` |
+| `PATCH` | `/api/candidates` | `fullName`, `email`, `phone`, `password`, `avatar`, `linkedinUrl`, `githubUrl`, `portfolioUrl`, `currentPosition`, `yearsOfExperience` | Cap nhat ho so candidate cua user dang dang nhap (lay `userId` tu `Authentication`); `password` trong body khong duoc ap dung. | `CandidateResponse` |
 
 ## 3. Recruiter API
 
@@ -41,7 +41,7 @@ Base path: `/api/recruiters`
 | Method | Endpoint | Body / Param chinh | Tac dung | Response chinh |
 |---|---|---|---|---|
 | `GET` | `/api/recruiters` | Khong co | Lay danh sach tat ca nha tuyen dung. | `List<RecruiterResponse>` |
-| `GET` | `/api/recruiters/{userId}` | Path variable `userId` | Lay chi tiet mot nha tuyen dung theo userId. | `RecruiterResponse` |
+| `GET` | `/api/recruiters/profile` | Khong co (lay `userId` tu `Authentication`) | Lay ho so recruiter cua user dang dang nhap. | `RecruiterResponse` |
 | `PATCH` | `/api/recruiters/{id}` | Path variable `id`; body gom `fullName`, `email`, `phone`, `password`, `avatar`, `companyId`, `position` | Cap nhat thong tin nha tuyen dung va thong tin user lien quan. | `RecruiterResponse` |
 
 ## 4. Company API
@@ -56,6 +56,7 @@ Base path: `/api/companies`
 | `GET` | `/api/companies/{id}` | Path variable `id` | Lay chi tiet cong ty theo id. | `CompanyResponse` |
 | `PATCH` | `/api/companies/{id}` | Path variable `id`; body gom `name`, `logo`, `email`, `website`, `description`, `address` | Cap nhat thong tin cong ty. | `CompanyResponse` |
 | `PATCH` | `/api/companies/{id}/deactivate` | Path variable `id` | Vo hieu hoa cong ty bang cach doi `isActive = false`. | `CompanyResponse` |
+| `PATCH` | `/api/companies/{id}/active` | Path variable `id` | Kich hoat lai cong ty bang cach doi `isActive = true`. | `CompanyResponse` |
 
 ## 5. User API
 
@@ -64,7 +65,8 @@ Base path: `/api/users`
 | Method | Endpoint | Body / Param chinh | Tac dung | Response chinh |
 |---|---|---|---|---|
 | `PATCH` | `/api/users/password` | `oldPassword`, `newPassword`, `confirmPassword` | Doi mat khau user dang dang nhap, lay user tu access token. | `data = null` |
-| `PATCH` | `/api/users` | `fullname`, `email`, `phone`, `password`, `avatar` | Cap nhat thong tin user theo `email` trong body. | `UserResponse` |
+| `PATCH` | `/api/users/{id}/password` | Path variable `id`; body `oldPassword`, `newPassword`, `confirmPassword` | Doi mat khau cho user theo id chi dinh. | `data = null` |
+| `PATCH` | `/api/users` | `fullname`, `email`, `phone`, `password`, `avatar` | Cap nhat thong tin user theo `email` trong body; `password` khong duoc cap nhat tai day. | `UserResponse` |
 
 ## 6. File API
 
@@ -93,81 +95,11 @@ Base path: `/api/jobs`
 
 | Method | Endpoint | Body / Param chinh | Tac dung | Response chinh |
 |---|---|---|---|---|
-| `POST` | `/api/jobs` | `title`, `description`, `requirements`, `location`, `employmentType`, `salaryMin`, `salaryMax`, `status`, `createdBy` | Tao job moi. | `JobResponse` |
+| `POST` | `/api/jobs` | `title`, `description`, `requirements`, `location`, `employmentType` (enum `FULLTIME`/`PARTTIME`), `companyId`, `salaryMin`, `salaryMax`, `status`, `createdBy` | Tao job moi; `companyId` bat buoc va phai la company co that. | `JobResponse` (co nested `company`) |
 | `GET` | `/api/jobs` | Khong co | Lay danh sach tat ca job. | `List<JobResponse>` |
 | `GET` | `/api/jobs/{id}` | Path variable `id` | Lay chi tiet job theo id. | `JobResponse` |
 | `PATCH` | `/api/jobs/{id}` | Path variable `id`; body nhu tao job | Cap nhat job. | `JobResponse` |
+| `PATCH` | `/api/jobs/{id}/deactivate` | Path variable `id` | Vo hieu hoa job bang cach doi `status = CLOSED`. | `JobResponse` |
+| `PATCH` | `/api/jobs/{id}/active` | Path variable `id` | Kich hoat lai job bang cach doi `status = OPEN`. | `JobResponse` |
 | `DELETE` | `/api/jobs/{id}` | Path variable `id` | Xoa job. | `data = null` |
 
-## 9. Job Application API
-
-Base path: `/api/applications`
-
-| Method | Endpoint | Body / Param chinh | Tac dung | Response chinh |
-|---|---|---|---|---|
-| `POST` | `/api/applications` | `candidateId`, `jobId`, `stageId`, `source`, `expectedSalary`, `note` | Tao don ung tuyen moi cho job dang `OPEN`; he thong tu gan status ban dau `APPLICATION_CREATED`. | `JobApplicationResponse` |
-| `GET` | `/api/applications` | Query optional `candidateId`, `jobId` | Lay danh sach application; neu co query thi loc theo candidate hoac job. | `List<JobApplicationResponse>` |
-| `GET` | `/api/applications/{id}` | Path variable `id` | Lay chi tiet application theo id. | `JobApplicationResponse` |
-| `GET` | `/api/applications/candidate/{candidateId}` | Path variable `candidateId` | Lay application theo candidate. | `List<JobApplicationResponse>` |
-| `GET` | `/api/applications/job/{jobId}` | Path variable `jobId` | Lay application theo job. | `List<JobApplicationResponse>` |
-| `PATCH` | `/api/applications/{id}` | Path variable `id`; body nhu tao application | Cap nhat application. | `JobApplicationResponse` |
-| `PATCH` | `/api/applications/{id}/status` | Path variable `id`; body `status`, `stageId` | Doi trang thai va stage cua application theo workflow hop le. | `JobApplicationResponse` |
-| `DELETE` | `/api/applications/{id}` | Path variable `id` | Xoa application. | `data = null` |
-
-Status workflow chinh:
-
-```text
-APPLICATION_CREATED -> SCREENING -> INTERVIEW -> OFFER -> HIRED
-```
-
-Co the chuyen sang `REJECTED` tu cac buoc `APPLICATION_CREATED`, `SCREENING`, `INTERVIEW`, `OFFER`/`OFFERED`.
-
-## 10. Application Stage API
-
-Base path: `/api/application-stages`
-
-| Method | Endpoint | Body / Param chinh | Tac dung | Response chinh |
-|---|---|---|---|---|
-| `POST` | `/api/application-stages` | `name`, `position` | Tao stage moi cho pipeline ung tuyen. | `ApplicationStageResponse` |
-| `GET` | `/api/application-stages` | Khong co | Lay danh sach stage. | `List<ApplicationStageResponse>` |
-| `GET` | `/api/application-stages/{id}` | Path variable `id` | Lay stage theo id. | `ApplicationStageResponse` |
-| `PATCH` | `/api/application-stages/{id}` | Path variable `id`; body `name`, `position` | Cap nhat stage. | `ApplicationStageResponse` |
-| `DELETE` | `/api/application-stages/{id}` | Path variable `id` | Xoa stage. | `data = null` |
-
-## 11. Interview API
-
-Base path: `/api/interviews`
-
-| Method | Endpoint | Body / Param chinh | Tac dung | Response chinh |
-|---|---|---|---|---|
-| `POST` | `/api/interviews` | `jobApplicationId`, `interviewerId`, `title`, `interviewTime`, `location`, `status` | Tao lich phong van. | `InterviewResponse` |
-| `GET` | `/api/interviews` | Khong co | Lay danh sach interview. | `List<InterviewResponse>` |
-| `GET` | `/api/interviews/{id}` | Path variable `id` | Lay interview theo id. | `InterviewResponse` |
-| `GET` | `/api/interviews/application/{applicationId}` | Path variable `applicationId` | Lay interview theo application. | `List<InterviewResponse>` |
-| `PATCH` | `/api/interviews/{id}` | Path variable `id`; body nhu tao interview | Cap nhat interview. | `InterviewResponse` |
-| `PATCH` | `/api/interviews/{id}/status` | Path variable `id`; body `status` | Doi trang thai interview. | `InterviewResponse` |
-| `DELETE` | `/api/interviews/{id}` | Path variable `id` | Xoa interview. | `data = null` |
-
-## 12. Interview Feedback API
-
-Base path: `/api/interview-feedbacks`
-
-| Method | Endpoint | Body / Param chinh | Tac dung | Response chinh |
-|---|---|---|---|---|
-| `POST` | `/api/interview-feedbacks` | `interviewId`, `recruiterId`, `rating`, `comment`, `recommendation` | Tao feedback cho buoi phong van. | `InterviewFeedbackResponse` |
-| `GET` | `/api/interview-feedbacks` | Khong co | Lay danh sach feedback. | `List<InterviewFeedbackResponse>` |
-| `GET` | `/api/interview-feedbacks/{id}` | Path variable `id` | Lay feedback theo id. | `InterviewFeedbackResponse` |
-| `PATCH` | `/api/interview-feedbacks/{id}` | Path variable `id`; body nhu tao feedback | Cap nhat feedback. | `InterviewFeedbackResponse` |
-| `DELETE` | `/api/interview-feedbacks/{id}` | Path variable `id` | Xoa feedback. | `data = null` |
-
-## 13. Activity Log API
-
-Base path: `/api/activity-logs`
-
-| Method | Endpoint | Body / Param chinh | Tac dung | Response chinh |
-|---|---|---|---|---|
-| `POST` | `/api/activity-logs` | `userId`, `action`, `entityType`, `entityId`, `description` | Tao activity log. | `ActivityLogResponse` |
-| `GET` | `/api/activity-logs` | Khong co | Lay danh sach activity log. | `List<ActivityLogResponse>` |
-| `GET` | `/api/activity-logs/{id}` | Path variable `id` | Lay activity log theo id. | `ActivityLogResponse` |
-| `GET` | `/api/activity-logs/user/{userId}` | Path variable `userId` | Lay activity log theo user. | `List<ActivityLogResponse>` |
-| `DELETE` | `/api/activity-logs/{id}` | Path variable `id` | Xoa activity log. | `data = null` |

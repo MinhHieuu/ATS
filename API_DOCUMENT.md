@@ -5,7 +5,7 @@ Tai lieu nay mo ta request va response tra ve cho tung API hien co trong project
 - Base URL mac dinh: `http://localhost:8080`
 - Content-Type mac dinh: `application/json`
 - Rieng API upload file dung: `multipart/form-data`
-- Theo `SecurityConfig` hien tai, cac API public gom `OPTIONS /**`, `/api/auth/register`, `/api/auth/register/recruiter`, `/api/auth/login`, `/api/auth/refresh-token`, `/uploads/**`. Cac API con lai can access token hop le.
+- Theo `SecurityConfig` hien tai, cac API public gom `OPTIONS /**`, `/api/auth/register`, `/api/auth/register/recruiter`, `/api/auth/login`, `/api/auth/refresh-token`, `/uploads/**`, `/api/companies/active`, `/ws/**`. Cac API con lai can access token hop le.
 
 ## Response format chung
 
@@ -454,15 +454,11 @@ Response thanh cong: `200 OK`
 }
 ```
 
-### 2. Lay recruiter theo userId
+### 2. Lay profile recruiter
 
-`GET /api/recruiters/{userId}`
+`GET /api/recruiters/profile`
 
-Path variable:
-
-| Param | Type | Mo ta |
-|---|---|---|
-| `userId` | `Long` | ID user cua recruiter |
+Lay thong tin recruiter cua user dang dang nhap. Code lay `userId` tu `Authentication` (recruiter dung chung khoa chinh voi user), nen request can access token hop le va khong can gui `id`.
 
 Response thanh cong: `200 OK`
 
@@ -767,6 +763,40 @@ Response thanh cong: `200 OK`
 }
 ```
 
+### 7. Kich hoat lai company
+
+`PATCH /api/companies/{id}/active`
+
+Doi trang thai cong ty ve active bang cach cap nhat `isActive = true`.
+
+Path variable:
+
+| Param | Type | Mo ta |
+|---|---|---|
+| `id` | `Long` | ID company |
+
+Request: khong co body.
+
+Response thanh cong: `200 OK`
+
+```json
+{
+  "message": "success",
+  "data": {
+    "id": 1,
+    "name": "ABC Company",
+    "logo": "https://example.com/logo.png",
+    "email": "contact@abc.com",
+    "website": "https://abc.com",
+    "description": "Software company",
+    "address": "Ho Chi Minh City",
+    "createdAt": "2026-06-27T10:00:00Z",
+    "updatedAt": "2026-06-27T10:05:00Z",
+    "isActive": true
+  }
+}
+```
+
 ## User API
 
 Base path: `/api/users`
@@ -804,7 +834,28 @@ Response thanh cong: `200 OK`
 }
 ```
 
-### 2. Cap nhat user
+### 2. Doi mat khau theo id
+
+`PATCH /api/users/{id}/password`
+
+Doi mat khau cho user theo `id` chi dinh (khong lay tu `Authentication`). Body va validation giong `PATCH /api/users/password`.
+
+Path variable:
+
+| Param | Type | Mo ta |
+|---|---|---|
+| `id` | `Long` | ID user can doi mat khau |
+
+Response thanh cong: `200 OK`
+
+```json
+{
+  "message": "success",
+  "data": null
+}
+```
+
+### 3. Cap nhat user
 
 `PATCH /api/users`
 
@@ -947,7 +998,8 @@ Request body:
   "description": "Build ATS features",
   "requirements": "Java, Spring Boot",
   "location": "Ho Chi Minh City",
-  "employmentType": "Full-time",
+  "employmentType": "FULLTIME",
+  "companyId": 1,
   "salaryMin": 1000,
   "salaryMax": 2000,
   "status": "OPEN",
@@ -955,7 +1007,9 @@ Request body:
 }
 ```
 
-Enum `status`: `OPEN`, `CLOSED`.
+Enum `employmentType`: `FULLTIME`, `PARTTIME`. Enum `status`: `OPEN`, `CLOSED` (mac dinh `OPEN` neu khong gui).
+
+Validation chinh: `title` bat buoc, toi da 150 ky tu; `location` toi da 100 ky tu; `companyId` bat buoc va phai la company co that; `salaryMin`, `salaryMax` phai lon hon hoac bang 0.
 
 Response thanh cong: `201 Created`
 
@@ -968,13 +1022,25 @@ Response thanh cong: `201 Created`
     "description": "Build ATS features",
     "requirements": "Java, Spring Boot",
     "location": "Ho Chi Minh City",
-    "employmentType": "Full-time",
+    "employmentType": "FULLTIME",
+    "company": {
+      "id": 1,
+      "name": "Acme Corp",
+      "logo": null,
+      "email": "hr@acme.com",
+      "website": null,
+      "description": "Software company",
+      "address": "Ho Chi Minh City",
+      "createdAt": "2026-06-27T10:00:00Z",
+      "updatedAt": null,
+      "isActive": true
+    },
     "salaryMin": 1000,
     "salaryMax": 2000,
     "status": "OPEN",
     "createdBy": 1,
     "createdAt": "2026-06-27T10:00:00Z",
-    "updatedAt": "2026-06-27T10:00:00Z"
+    "updatedAt": null
   }
 }
 ```
@@ -986,213 +1052,9 @@ Response thanh cong: `201 Created`
 | `GET` | `/api/jobs` | Lay tat ca job | `ApiResponse<List<JobResponse>>` |
 | `GET` | `/api/jobs/{id}` | Lay job theo id | `ApiResponse<JobResponse>` |
 | `PATCH` | `/api/jobs/{id}` | Cap nhat job voi body nhu tao job | `ApiResponse<JobResponse>` |
+| `PATCH` | `/api/jobs/{id}/deactivate` | Vo hieu hoa job bang cach doi `status = CLOSED` | `ApiResponse<JobResponse>` |
+| `PATCH` | `/api/jobs/{id}/active` | Kich hoat lai job bang cach doi `status = OPEN` | `ApiResponse<JobResponse>` |
 | `DELETE` | `/api/jobs/{id}` | Xoa job | `ApiResponse<Void>` voi message `delete success` |
-
-## Job Application API
-
-Base path: `/api/applications`
-
-### 1. Tao application
-
-`POST /api/applications`
-
-Request body:
-
-```json
-{
-  "candidateId": 1,
-  "jobId": 1,
-  "stageId": 1,
-  "source": "LinkedIn",
-  "expectedSalary": 1500,
-  "note": "Available immediately"
-}
-```
-
-Ghi chu nghiep vu:
-
-- `jobId` phai la job dang `OPEN`; neu job `CLOSED` he thong tra `409 Conflict`.
-- Moi application moi luon co status ban dau `APPLICATION_CREATED`; client khong can gui `status` khi tao.
-- Mot candidate khong duoc apply trung mot job; neu trung he thong tra `409 Conflict`.
-- `source` duoc luu va tra ve trong response.
-
-Enum `status`: `APPLICATION_CREATED`, `APPLIED`, `SCREENING`, `INTERVIEW`, `OFFER`, `OFFERED`, `HIRED`, `REJECTED`, `WITHDRAWN`.
-
-Response thanh cong: `201 Created`
-
-```json
-{
-  "message": "create success",
-  "data": {
-    "id": 1,
-    "candidateId": 1,
-    "jobId": 1,
-    "stageId": 1,
-    "status": "APPLICATION_CREATED",
-    "source": "LinkedIn",
-    "expectedSalary": 1500,
-    "note": "Available immediately",
-    "appliedAt": "2026-06-27T10:00:00Z",
-    "updatedAt": "2026-06-27T10:00:00Z"
-  }
-}
-```
-
-### 2. Lay danh sach application
-
-`GET /api/applications`
-
-Query optional:
-
-| Param | Mo ta |
-|---|---|
-| `candidateId` | Neu co thi loc theo candidate |
-| `jobId` | Neu co thi loc theo job |
-
-Response thanh cong: `ApiResponse<List<JobApplicationResponse>>` voi message `success`.
-
-### 3. Cac endpoint application khac
-
-| Method | Endpoint | Mo ta | Response |
-|---|---|---|---|
-| `GET` | `/api/applications/{id}` | Lay application theo id | `ApiResponse<JobApplicationResponse>` |
-| `GET` | `/api/applications/candidate/{candidateId}` | Lay application theo candidate | `ApiResponse<List<JobApplicationResponse>>` |
-| `GET` | `/api/applications/job/{jobId}` | Lay application theo job | `ApiResponse<List<JobApplicationResponse>>` |
-| `PATCH` | `/api/applications/{id}` | Cap nhat application voi body nhu tao application | `ApiResponse<JobApplicationResponse>` |
-| `PATCH` | `/api/applications/{id}/status` | Doi status voi body `status`, `stageId` | `ApiResponse<JobApplicationResponse>` |
-| `DELETE` | `/api/applications/{id}` | Xoa application | `ApiResponse<Void>` voi message `delete success` |
-
-Workflow doi status hop le:
-
-```text
-APPLICATION_CREATED -> SCREENING -> INTERVIEW -> OFFER -> HIRED
-```
-
-Co the chuyen sang `REJECTED` tu cac buoc `APPLICATION_CREATED`, `SCREENING`, `INTERVIEW`, `OFFER`/`OFFERED`.
-Code van chap nhan enum cu `APPLIED` va `OFFERED` de tuong thich, nhung luong tao moi mac dinh dung `APPLICATION_CREATED`.
-
-Body doi status:
-
-```json
-{
-  "status": "SCREENING",
-  "stageId": 2
-}
-```
-
-## Application Stage API
-
-Base path: `/api/application-stages`
-
-Request body tao/cap nhat:
-
-```json
-{
-  "name": "Screening",
-  "position": 1
-}
-```
-
-Validation chinh: `name` bat buoc, toi da 100 ky tu; `position` bat buoc va lon hon hoac bang 0.
-
-| Method | Endpoint | Mo ta | Response |
-|---|---|---|---|
-| `POST` | `/api/application-stages` | Tao stage | `ApiResponse<ApplicationStageResponse>` voi message `create success` |
-| `GET` | `/api/application-stages` | Lay tat ca stage | `ApiResponse<List<ApplicationStageResponse>>` |
-| `GET` | `/api/application-stages/{id}` | Lay stage theo id | `ApiResponse<ApplicationStageResponse>` |
-| `PATCH` | `/api/application-stages/{id}` | Cap nhat stage | `ApiResponse<ApplicationStageResponse>` |
-| `DELETE` | `/api/application-stages/{id}` | Xoa stage | `ApiResponse<Void>` voi message `delete success` |
-
-## Interview API
-
-Base path: `/api/interviews`
-
-Request body tao/cap nhat:
-
-```json
-{
-  "jobApplicationId": 1,
-  "interviewerId": 1,
-  "title": "Technical Interview",
-  "interviewTime": "2026-06-30T03:00:00Z",
-  "location": "Google Meet",
-  "status": "SCHEDULED"
-}
-```
-
-Enum `status`: `SCHEDULED`, `IN_PROGRESS`, `COMPLETED`, `CANCELLED`, `NO_SHOW`, `RESCHEDULED`.
-
-| Method | Endpoint | Mo ta | Response |
-|---|---|---|---|
-| `POST` | `/api/interviews` | Tao interview | `ApiResponse<InterviewResponse>` voi message `create success` |
-| `GET` | `/api/interviews` | Lay tat ca interview | `ApiResponse<List<InterviewResponse>>` |
-| `GET` | `/api/interviews/{id}` | Lay interview theo id | `ApiResponse<InterviewResponse>` |
-| `GET` | `/api/interviews/application/{applicationId}` | Lay interview theo application | `ApiResponse<List<InterviewResponse>>` |
-| `PATCH` | `/api/interviews/{id}` | Cap nhat interview | `ApiResponse<InterviewResponse>` |
-| `PATCH` | `/api/interviews/{id}/status` | Doi status voi body `status` | `ApiResponse<InterviewResponse>` |
-| `DELETE` | `/api/interviews/{id}` | Xoa interview | `ApiResponse<Void>` voi message `delete success` |
-
-Body doi status:
-
-```json
-{
-  "status": "COMPLETED"
-}
-```
-
-## Interview Feedback API
-
-Base path: `/api/interview-feedbacks`
-
-Request body tao/cap nhat:
-
-```json
-{
-  "interviewId": 1,
-  "recruiterId": 1,
-  "rating": 4,
-  "comment": "Strong technical foundation",
-  "recommendation": "HIRE"
-}
-```
-
-Validation chinh: `interviewId`, `recruiterId` bat buoc; `rating` tu 1 den 5; `recommendation` toi da 50 ky tu.
-
-| Method | Endpoint | Mo ta | Response |
-|---|---|---|---|
-| `POST` | `/api/interview-feedbacks` | Tao feedback | `ApiResponse<InterviewFeedbackResponse>` voi message `create success` |
-| `GET` | `/api/interview-feedbacks` | Lay tat ca feedback | `ApiResponse<List<InterviewFeedbackResponse>>` |
-| `GET` | `/api/interview-feedbacks/{id}` | Lay feedback theo id | `ApiResponse<InterviewFeedbackResponse>` |
-| `PATCH` | `/api/interview-feedbacks/{id}` | Cap nhat feedback | `ApiResponse<InterviewFeedbackResponse>` |
-| `DELETE` | `/api/interview-feedbacks/{id}` | Xoa feedback | `ApiResponse<Void>` voi message `delete success` |
-
-## Activity Log API
-
-Base path: `/api/activity-logs`
-
-Request body tao:
-
-```json
-{
-  "userId": 1,
-  "action": "CREATE",
-  "entityType": "JOB",
-  "entityId": 1,
-  "description": "Created job Java Developer"
-}
-```
-
-Enum `action`: `CREATE`, `UPDATE`, `DELETE`, `CHANGE_STATUS`.
-
-Enum `entityType`: `JOB`, `APPLICATION`, `INTERVIEW`, `CANDIDATE`, `USER`.
-
-| Method | Endpoint | Mo ta | Response |
-|---|---|---|---|
-| `POST` | `/api/activity-logs` | Tao activity log | `ApiResponse<ActivityLogResponse>` voi message `create success` |
-| `GET` | `/api/activity-logs` | Lay tat ca activity log | `ApiResponse<List<ActivityLogResponse>>` |
-| `GET` | `/api/activity-logs/{id}` | Lay activity log theo id | `ApiResponse<ActivityLogResponse>` |
-| `GET` | `/api/activity-logs/user/{userId}` | Lay activity log theo user | `ApiResponse<List<ActivityLogResponse>>` |
-| `DELETE` | `/api/activity-logs/{id}` | Xoa activity log | `ApiResponse<Void>` voi message `delete success` |
 
 ## Tom tat endpoint
 
@@ -1208,7 +1070,7 @@ Enum `entityType`: `JOB`, `APPLICATION`, `INTERVIEW`, `CANDIDATE`, `USER`.
 | `GET` | `/api/candidates/profile` | Lay profile candidate |
 | `PATCH` | `/api/candidates` | Cap nhat candidate |
 | `GET` | `/api/recruiters` | Lay danh sach recruiter |
-| `GET` | `/api/recruiters/{userId}` | Lay recruiter theo userId |
+| `GET` | `/api/recruiters/profile` | Lay profile recruiter |
 | `PATCH` | `/api/recruiters/{id}` | Cap nhat recruiter |
 | `POST` | `/api/companies` | Tao company |
 | `GET` | `/api/companies` | Lay danh sach company |
@@ -1216,7 +1078,9 @@ Enum `entityType`: `JOB`, `APPLICATION`, `INTERVIEW`, `CANDIDATE`, `USER`.
 | `GET` | `/api/companies/{id}` | Lay company theo id |
 | `PATCH` | `/api/companies/{id}` | Cap nhat company |
 | `PATCH` | `/api/companies/{id}/deactivate` | Vo hieu hoa company |
-| `PATCH` | `/api/users/password` | Doi mat khau |
+| `PATCH` | `/api/companies/{id}/active` | Kich hoat lai company |
+| `PATCH` | `/api/users/password` | Doi mat khau (user dang dang nhap) |
+| `PATCH` | `/api/users/{id}/password` | Doi mat khau theo id |
 | `PATCH` | `/api/users` | Cap nhat user |
 | `POST` | `/api/files/upload` | Upload file |
 | `POST` | `/api/resumes` | Tao resume |
@@ -1229,15 +1093,9 @@ Enum `entityType`: `JOB`, `APPLICATION`, `INTERVIEW`, `CANDIDATE`, `USER`.
 | `GET` | `/api/jobs` | Lay danh sach job |
 | `GET` | `/api/jobs/{id}` | Lay job theo id |
 | `PATCH` | `/api/jobs/{id}` | Cap nhat job |
+| `PATCH` | `/api/jobs/{id}/deactivate` | Vo hieu hoa job |
+| `PATCH` | `/api/jobs/{id}/active` | Kich hoat lai job |
 | `DELETE` | `/api/jobs/{id}` | Xoa job |
-| `POST` | `/api/applications` | Tao application |
-| `GET` | `/api/applications` | Lay/loc danh sach application |
-| `GET` | `/api/applications/{id}` | Lay application theo id |
-| `GET` | `/api/applications/candidate/{candidateId}` | Lay application theo candidate |
-| `GET` | `/api/applications/job/{jobId}` | Lay application theo job |
-| `PATCH` | `/api/applications/{id}` | Cap nhat application |
-| `PATCH` | `/api/applications/{id}/status` | Doi trang thai application |
-| `DELETE` | `/api/applications/{id}` | Xoa application |
 | `POST` | `/api/application-stages` | Tao stage |
 | `GET` | `/api/application-stages` | Lay danh sach stage |
 | `GET` | `/api/application-stages/{id}` | Lay stage theo id |

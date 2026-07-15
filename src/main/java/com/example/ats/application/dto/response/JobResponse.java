@@ -1,5 +1,6 @@
 package com.example.ats.application.dto.response;
 
+import com.example.ats.domain.model.EmploymentType;
 import com.example.ats.domain.model.JobStatus;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -19,7 +20,8 @@ public class JobResponse {
     private String description;
     private String requirements;
     private String location;
-    private String employmentType;
+    private EmploymentType employmentType;
+    private CompanyResponse company;
     private BigDecimal salaryMin;
     private BigDecimal salaryMax;
     private JobStatus status;

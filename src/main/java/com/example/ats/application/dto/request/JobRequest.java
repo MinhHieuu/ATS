@@ -1,7 +1,9 @@
 package com.example.ats.application.dto.request;
 
+import com.example.ats.domain.model.EmploymentType;
 import com.example.ats.domain.model.JobStatus;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
@@ -19,8 +21,9 @@ public class JobRequest {
     private String requirements;
     @Size(max = 100, message = "Location must not exceed 100 characters")
     private String location;
-    @Size(max = 50, message = "Employment type must not exceed 50 characters")
-    private String employmentType;
+    private EmploymentType employmentType;
+    @NotNull(message = "Company is required")
+    private Long companyId;
     @PositiveOrZero(message = "Minimum salary must be greater than or equal to 0")
     private BigDecimal salaryMin;
     @PositiveOrZero(message = "Maximum salary must be greater than or equal to 0")
