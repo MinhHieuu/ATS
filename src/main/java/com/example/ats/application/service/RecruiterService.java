@@ -12,7 +12,7 @@ import com.example.ats.application.port.in.UserUseCase;
 import com.example.ats.application.port.out.RecruiterRepository;
 import com.example.ats.domain.model.Recruiter;
 import com.example.ats.domain.model.Role;
-import com.example.ats.domain.result.RecruiterResult;
+import com.example.ats.domain.view.RecruiterView;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -80,7 +80,7 @@ public class RecruiterService implements RecruiterUseCase {
                 .toList();
     }
 
-    private RecruiterResponse toResponse(RecruiterResult recruiterWithUser) {
+    private RecruiterResponse toResponse(RecruiterView recruiterWithUser) {
         RecruiterResponse response = mapper.toResponse(recruiterWithUser.recruiter());
         response.setUser(userMapper.toResponse(recruiterWithUser.user()));
         if (recruiterWithUser.company() != null) {

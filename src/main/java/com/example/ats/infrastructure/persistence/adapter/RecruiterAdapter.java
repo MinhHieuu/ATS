@@ -8,7 +8,7 @@ import com.example.ats.domain.exception.ResourceNotFoundException;
 import com.example.ats.domain.model.Company;
 import com.example.ats.domain.model.Recruiter;
 import com.example.ats.domain.model.User;
-import com.example.ats.domain.result.RecruiterResult;
+import com.example.ats.domain.view.RecruiterView;
 import com.example.ats.infrastructure.persistence.entity.CompanyEntity;
 import com.example.ats.infrastructure.persistence.entity.RecruiterEntity;
 import com.example.ats.infrastructure.persistence.entity.UserEntity;
@@ -62,9 +62,9 @@ public class RecruiterAdapter implements RecruiterRepository {
 
 
     @Override
-    public List<RecruiterResult> findAllWithUser() {
+    public List<RecruiterView> findAllWithUser() {
         return repository.findAllWithUser().stream()
-                .map(entity -> new RecruiterResult(
+                .map(entity -> new RecruiterView(
                         toRecruiter(entity),
                         toUser(entity.getUser()),
                         toCompany(entity.getCompany())))

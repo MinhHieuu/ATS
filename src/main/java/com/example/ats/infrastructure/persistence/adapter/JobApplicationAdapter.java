@@ -5,11 +5,9 @@ import com.example.ats.application.port.out.JobApplicationRepository;
 import com.example.ats.domain.exception.ResourceNotFoundException;
 import com.example.ats.domain.model.JobApplication;
 import com.example.ats.infrastructure.persistence.entity.ApplicationEntity;
-import com.example.ats.infrastructure.persistence.entity.ApplicationStageEntity;
 import com.example.ats.infrastructure.persistence.entity.CandidateEntity;
 import com.example.ats.infrastructure.persistence.entity.JobEntity;
 import com.example.ats.infrastructure.persistence.repository.SpringDataApplicationRepository;
-import com.example.ats.infrastructure.persistence.repository.SpringDataApplicationStageRepository;
 import com.example.ats.infrastructure.persistence.repository.SpringDataCandidateRepository;
 import com.example.ats.infrastructure.persistence.repository.SpringDataJobRepository;
 import org.springframework.stereotype.Repository;
@@ -21,18 +19,15 @@ public class JobApplicationAdapter implements JobApplicationRepository {
     private final SpringDataApplicationRepository repository;
     private final SpringDataCandidateRepository candidateRepository;
     private final SpringDataJobRepository jobRepository;
-    private final SpringDataApplicationStageRepository stageRepository;
     private final JobApplicationMapper mapper;
 
     public JobApplicationAdapter(SpringDataApplicationRepository repository,
                                  SpringDataCandidateRepository candidateRepository,
                                  SpringDataJobRepository jobRepository,
-                                 SpringDataApplicationStageRepository stageRepository,
                                  JobApplicationMapper mapper) {
         this.repository = repository;
         this.candidateRepository = candidateRepository;
         this.jobRepository = jobRepository;
-        this.stageRepository = stageRepository;
         this.mapper = mapper;
     }
 
@@ -42,11 +37,9 @@ public class JobApplicationAdapter implements JobApplicationRepository {
                 .orElseThrow(() -> new ResourceNotFoundException("Candidate not found"));
         JobEntity job = jobRepository.findById(application.getJobId())
                 .orElseThrow(() -> new ResourceNotFoundException("Job not found"));
-        ApplicationStageEntity stage = application.getStageId() == null ? null : stageRepository.findById(application.getStageId())
-                .orElseThrow(() -> new ResourceNotFoundException("Application stage not found"));
-        ApplicationEntity entity = new ApplicationEntity(application.getId(), candidate, job, stage,
+        ApplicationEntity entity = new ApplicationEntity(application.getId(), candidate, job,
                 application.getStatus(), application.getSource(), application.getExpectedSalary(), application.getNote(),
-                application.getAppliedAt(), application.getUpdatedAt(), null);
+                application.getAppliedAt(), application.getUpdatedAt());
         return mapper.toDomain(repository.save(entity));
     }
 

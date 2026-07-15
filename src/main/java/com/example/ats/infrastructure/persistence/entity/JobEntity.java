@@ -1,5 +1,6 @@
 package com.example.ats.infrastructure.persistence.entity;
 
+import com.example.ats.domain.model.EmploymentType;
 import com.example.ats.domain.model.JobStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -29,8 +30,9 @@ public class JobEntity {
     private String requirements;
     @Column(length = 100)
     private String location;
-    @Column(name = "employment_type", length = 50)
-    private String employmentType;
+    @Column(name = "employment_type")
+    @Enumerated(EnumType.STRING)
+    private EmploymentType employmentType;
     @Column(name = "salary_min", precision = 12, scale = 2)
     private BigDecimal salaryMin;
     @Column(name = "salary_max", precision = 12, scale = 2)

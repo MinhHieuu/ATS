@@ -10,5 +10,4 @@ import lombok.Setter;
 public class ApplicationStatusRequest {
     @NotNull(message = "Status is required")
     private ApplicationStatus status;
-    private Long stageId;
 }

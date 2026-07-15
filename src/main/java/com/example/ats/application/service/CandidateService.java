@@ -10,7 +10,7 @@ import com.example.ats.application.port.in.UserUseCase;
 import com.example.ats.application.port.out.CandidateRepository;
 import com.example.ats.domain.model.Candidate;
 import com.example.ats.domain.model.Role;
-import com.example.ats.domain.result.CandidateResult;
+import com.example.ats.domain.view.CandidateView;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -55,14 +55,6 @@ public class CandidateService implements CandidateUseCase {
         return updateCandidate(request, user, now, candidate);
     }
 
-    @Override
-    public CandidateResponse updateByUserId(CandidateRequest request, Long userId) {
-        Instant now = Instant.now();
-        Candidate candidate = repository.findByUserId(userId);
-        UserResponse user = userUseCase.update(userId, request);
-        return updateCandidate(request, user, now, candidate);
-    }
-
     private CandidateResponse updateCandidate(CandidateRequest request, UserResponse user, Instant now, Candidate candidate) {
         candidate.setLinkedinUrl(request.getLinkedinUrl());
         candidate.setGithubUrl(request.getGithubUrl());
@@ -82,18 +74,13 @@ public class CandidateService implements CandidateUseCase {
     }
 
     @Override
-    public CandidateResponse findByUserId(Long userId) {
-        return toResponse(repository.findByUserId(userId));
-    }
-
-    @Override
     public List<CandidateResponse> findAll() {
         return repository.findAllWithUser().stream()
                 .map(this::toResponse)
                 .toList();
     }
 
-      private CandidateResponse toResponse(CandidateResult candidateWithUser) {
+      private CandidateResponse toResponse(CandidateView candidateWithUser) {
         CandidateResponse response = mapper.toResponse(candidateWithUser.candidate());
         response.setUser(userMapper.toResponse(candidateWithUser.user()));
         return response;

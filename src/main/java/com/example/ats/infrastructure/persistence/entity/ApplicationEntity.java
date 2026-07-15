@@ -10,7 +10,6 @@ import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.Instant;
-import java.util.List;
 
 @Entity
 @Table(name = "applications")
@@ -28,9 +27,6 @@ public class ApplicationEntity {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "job_id", nullable = false)
     private JobEntity job;
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "stage_id")
-    private ApplicationStageEntity stage;
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 50)
     private ApplicationStatus status;
@@ -44,6 +40,4 @@ public class ApplicationEntity {
     private Instant appliedAt;
     @Column(name = "updated_at")
     private Instant updatedAt;
-    @OneToMany(mappedBy = "application")
-    private List<InterviewEntity> interviews;
 }

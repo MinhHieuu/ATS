@@ -57,4 +57,9 @@ public class CompanyController {
     public ResponseEntity<ApiResponse<CompanyResponse>> deactivate(@PathVariable Long id) {
         return ResponseEntity.ok(new ApiResponse<>("success", companyUseCase.deactivate(id)));
     }
+
+    @PatchMapping("{id}/active")
+    public ResponseEntity<ApiResponse<CompanyResponse>> active(@PathVariable Long id) {
+        return ResponseEntity.ok(new ApiResponse<>("success", companyUseCase.activate(id)));
+    }
 }

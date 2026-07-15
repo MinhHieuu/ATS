@@ -35,14 +35,15 @@ public class CandidateController {
 
     @GetMapping("profile")
     public ResponseEntity<ApiResponse<CandidateResponse>> findProfille(Authentication authentication) {
-        Long userId = ((User) authentication.getPrincipal()).getId();
-        return ResponseEntity.ok(new ApiResponse("success", candidateUseCase.findByUserId(userId)));
+        Long id = ((User) authentication.getPrincipal()).getId();
+        return ResponseEntity.ok(new ApiResponse("success", candidateUseCase.findById(id)));
     }
 
     @PatchMapping("")
     public ResponseEntity<ApiResponse<CandidateResponse>> update(Authentication authentication,
                                                                 @Valid @RequestBody CandidateRequest request) {
-        Long userId = ((User) authentication.getPrincipal()).getId();
-        return ResponseEntity.ok(new ApiResponse<>("success", candidateUseCase.updateByUserId(request, userId)));
+        // candidate.id dùng chung khóa chính với user.id (xem CandidateEntity#user @MapsId)
+        Long id = ((User) authentication.getPrincipal()).getId();
+        return ResponseEntity.ok(new ApiResponse<>("success", candidateUseCase.update(request, id)));
     }
 }

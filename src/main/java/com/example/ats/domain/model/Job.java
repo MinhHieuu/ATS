@@ -16,7 +16,8 @@ public class Job {
     private String description;
     private String requirements;
     private String location;
-    private String employmentType;
+    private EmploymentType employmentType;
+    private Long companyId;
     private BigDecimal salaryMin;
     private BigDecimal salaryMax;
     private JobStatus status;

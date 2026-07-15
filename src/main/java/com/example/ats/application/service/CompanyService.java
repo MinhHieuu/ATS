@@ -62,6 +62,14 @@ public class CompanyService implements CompanyUseCase {
     }
 
     @Override
+    public CompanyResponse activate(Long id) {
+        Company company = repository.findById(id);
+        company.setIsActive(true);
+        company.setUpdatedAt(Instant.now());
+        return mapper.toResponse(repository.save(company));
+    }
+
+    @Override
     public CompanyResponse findById(Long id) {
         return mapper.toResponse(repository.findById(id));
     }

@@ -6,7 +6,7 @@ import com.example.ats.application.port.out.CandidateRepository;
 import com.example.ats.domain.exception.ResourceNotFoundException;
 import com.example.ats.domain.model.Candidate;
 import com.example.ats.domain.model.User;
-import com.example.ats.domain.result.CandidateResult;
+import com.example.ats.domain.view.CandidateView;
 import com.example.ats.infrastructure.persistence.entity.CandidateEntity;
 import com.example.ats.infrastructure.persistence.entity.UserEntity;
 import com.example.ats.infrastructure.persistence.repository.SpringDataCandidateRepository;
@@ -45,15 +45,9 @@ public class CandidateAdapter implements CandidateRepository {
     }
 
     @Override
-    public Candidate findByUserId(Long userId) {
-        return toCandidate(repository.findByUserId(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("Candidate not found")));
-    }
-
-    @Override
-    public List<CandidateResult> findAllWithUser() {
+    public List<CandidateView> findAllWithUser() {
         return repository.findAllWithUser().stream()
-                .map(entity -> new CandidateResult(
+                .map(entity -> new CandidateView(
                         toCandidate(entity),
                         toUser(entity.getUser())))
                 .toList();

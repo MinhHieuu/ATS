@@ -1,7 +1,5 @@
 package com.example.ats.infrastructure.persistence.entity;
 
-import java.util.List;
-
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -26,15 +24,4 @@ public class RecruiterEntity {
     private CompanyEntity company;
     @Column
     private  String position;
-    @OneToMany(mappedBy = "interviewer")
-    private List<InterviewEntity> interviews;
-    @OneToMany(mappedBy = "reviewer")
-    private List<InterviewFeedbackEntity> feedbacks;
-
-    public RecruiterEntity(Long id, UserEntity user, CompanyEntity company, String position) {
-        this.id = id;
-        this.user = user;
-        this.company = company;
-        this.position = position;
-    }
 }

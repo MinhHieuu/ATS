@@ -33,9 +33,10 @@ public class RecruiterController {
     }
 
     @GetMapping("profile")
-    public ResponseEntity<ApiResponse<RecruiterResponse>> findByUserId(Authentication authentication) {
-        Long userId = ((User) authentication.getPrincipal()).getId();
-        return ResponseEntity.ok(new ApiResponse<>("success", recruiterUseCase.findByUserId(userId)));
+    public ResponseEntity<ApiResponse<RecruiterResponse>> findProfile(Authentication authentication) {
+        // recruiter.id dùng chung khóa chính với user.id (xem RecruiterEntity#user @MapsId)
+        Long id = ((User) authentication.getPrincipal()).getId();
+        return ResponseEntity.ok(new ApiResponse<>("success", recruiterUseCase.findById(id)));
     }
 
     @PatchMapping("{id}")

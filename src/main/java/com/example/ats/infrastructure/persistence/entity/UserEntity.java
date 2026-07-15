@@ -9,7 +9,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.Instant;
-import java.util.List;
 
 @Entity
 @Table(name = "users")
@@ -44,7 +43,5 @@ public class UserEntity {
     private CandidateEntity candidate;
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
     private RecruiterEntity recruiter;
-    @OneToMany(mappedBy = "user")
-    private List<ActivityLogEntity> actions;
 
 }
