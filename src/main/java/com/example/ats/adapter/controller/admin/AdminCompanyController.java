@@ -1,4 +1,4 @@
-package com.example.ats.adapter.controller;
+package com.example.ats.adapter.controller.admin;
 
 import com.example.ats.application.dto.request.CompanyRequest;
 import com.example.ats.application.dto.response.CompanyResponse;
@@ -18,11 +18,11 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/companies")
-public class CompanyController {
+@RequestMapping("/api/admin/companies")
+public class AdminCompanyController {
     private final CompanyUseCase companyUseCase;
 
-    public CompanyController(CompanyUseCase companyUseCase) {
+    public AdminCompanyController(CompanyUseCase companyUseCase) {
         this.companyUseCase = companyUseCase;
     }
 

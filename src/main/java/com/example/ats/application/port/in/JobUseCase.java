@@ -11,6 +11,12 @@ public interface JobUseCase {
     JobResponse activate(Long id);
     JobResponse deactivate(Long id);
     JobResponse findById(Long id);
+    JobResponse findByIdNotClosed(Long id);
     List<JobResponse> findAll();
+    List<JobResponse> findAllNotClosed();
+    List<JobResponse> findByCreatedBy(Long createdBy);
+    List<JobResponse> searchByTitle(String title);
+    List<JobResponse> searchByTitleNotClosed(String title);
+    List<JobResponse> searchByTitleAndCreatedBy(String title, Long createdBy);
     void delete(Long id);
 }

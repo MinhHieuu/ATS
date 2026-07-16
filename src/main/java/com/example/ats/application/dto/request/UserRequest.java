@@ -20,11 +20,10 @@ public class UserRequest {
     @Size(max = 150, message = "Email must not exceed 150 characters")
     private String email;
 
-    @NotBlank(message = "Phone is required")
     @Size(max = 20, message = "Phone must not exceed 20 characters")
     private String phone;
 
-    @Size(min = 8, message = "Password must contain at least 8 characters")
+    @Size(min = 6, message = "Password must contain at least 8 characters")
     private String password;
 
     private String avatar;

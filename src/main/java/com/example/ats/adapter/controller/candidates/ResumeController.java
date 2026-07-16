@@ -1,4 +1,4 @@
-package com.example.ats.adapter.controller;
+package com.example.ats.adapter.controller.candidates;
 
 import com.example.ats.application.dto.request.ResumeRequest;
 import com.example.ats.application.dto.response.ResumeResponse;

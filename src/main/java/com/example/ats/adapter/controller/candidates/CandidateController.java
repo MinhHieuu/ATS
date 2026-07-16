@@ -1,14 +1,14 @@
-package com.example.ats.adapter.controller;
+package com.example.ats.adapter.controller.candidates;
 
 import com.example.ats.application.dto.request.CandidateRequest;
 import com.example.ats.application.dto.response.CandidateResponse;
 import com.example.ats.application.port.in.CandidateUseCase;
 import com.example.ats.domain.model.ApiResponse;
-import com.example.ats.domain.model.User;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -35,15 +35,15 @@ public class CandidateController {
 
     @GetMapping("profile")
     public ResponseEntity<ApiResponse<CandidateResponse>> findProfille(Authentication authentication) {
-        Long id = ((User) authentication.getPrincipal()).getId();
-        return ResponseEntity.ok(new ApiResponse("success", candidateUseCase.findById(id)));
+        Number userId = ((Jwt) authentication.getPrincipal()).getClaim("userId");
+        return ResponseEntity.ok(new ApiResponse("success", candidateUseCase.findById(userId.longValue())));
     }
 
     @PatchMapping("")
     public ResponseEntity<ApiResponse<CandidateResponse>> update(Authentication authentication,
                                                                 @Valid @RequestBody CandidateRequest request) {
         // candidate.id dùng chung khóa chính với user.id (xem CandidateEntity#user @MapsId)
-        Long id = ((User) authentication.getPrincipal()).getId();
-        return ResponseEntity.ok(new ApiResponse<>("success", candidateUseCase.update(request, id)));
+        Number userId = ((Jwt) authentication.getPrincipal()).getClaim("userId");
+        return ResponseEntity.ok(new ApiResponse<>("success", candidateUseCase.update(request, userId.longValue())));
     }
 }

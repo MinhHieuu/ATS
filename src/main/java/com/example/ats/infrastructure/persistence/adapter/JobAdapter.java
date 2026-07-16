@@ -67,6 +67,32 @@ public class JobAdapter implements JobRepository {
     }
 
     @Override
+    public List<JobView> findByStatusNot(JobStatus status) {
+        return repository.findByStatusNot(status).stream().map(this::toView).toList();
+    }
+
+    @Override
+    public List<JobView> findByCreatedBy(Long createdBy) {
+        return repository.findByCreatedBy_Id(createdBy).stream().map(this::toView).toList();
+    }
+
+    @Override
+    public List<JobView> searchByTitle(String title) {
+        return repository.findByTitleContainingIgnoreCase(title).stream().map(this::toView).toList();
+    }
+
+    @Override
+    public List<JobView> searchByTitleAndStatusNot(String title, JobStatus status) {
+        return repository.findByTitleContainingIgnoreCaseAndStatusNot(title, status).stream().map(this::toView).toList();
+    }
+
+    @Override
+    public List<JobView> searchByTitleAndCreatedBy(String title, Long createdBy) {
+        return repository.findByTitleContainingIgnoreCaseAndCreatedBy_Id(title, createdBy).stream()
+                .map(this::toView).toList();
+    }
+
+    @Override
     public void deleteById(Long id) {
         if (!repository.existsById(id)) {
             throw new ResourceNotFoundException("Job not found");

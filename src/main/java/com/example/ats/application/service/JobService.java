@@ -6,6 +6,7 @@ import com.example.ats.application.mapper.CompanyMapper;
 import com.example.ats.application.mapper.JobMapper;
 import com.example.ats.application.port.in.JobUseCase;
 import com.example.ats.application.port.out.JobRepository;
+import com.example.ats.domain.exception.ResourceNotFoundException;
 import com.example.ats.domain.model.Job;
 import com.example.ats.domain.model.JobStatus;
 import com.example.ats.domain.view.JobView;
@@ -72,8 +73,43 @@ public class JobService implements JobUseCase {
     }
 
     @Override
+    public JobResponse findByIdNotClosed(Long id) {
+        JobView view = repository.findById(id);
+        // Bao 404 thay vi 403 de khong lo ra su ton tai cua job da dong.
+        if (view.job().getStatus() == JobStatus.CLOSED) {
+            throw new ResourceNotFoundException("Job not found");
+        }
+        return toResponse(view);
+    }
+
+    @Override
     public List<JobResponse> findAll() {
         return repository.findAll().stream().map(this::toResponse).toList();
+    }
+
+    @Override
+    public List<JobResponse> findAllNotClosed() {
+        return repository.findByStatusNot(JobStatus.CLOSED).stream().map(this::toResponse).toList();
+    }
+
+    @Override
+    public List<JobResponse> findByCreatedBy(Long createdBy) {
+        return repository.findByCreatedBy(createdBy).stream().map(this::toResponse).toList();
+    }
+
+    @Override
+    public List<JobResponse> searchByTitle(String title) {
+        return repository.searchByTitle(title).stream().map(this::toResponse).toList();
+    }
+
+    @Override
+    public List<JobResponse> searchByTitleNotClosed(String title) {
+        return repository.searchByTitleAndStatusNot(title, JobStatus.CLOSED).stream().map(this::toResponse).toList();
+    }
+
+    @Override
+    public List<JobResponse> searchByTitleAndCreatedBy(String title, Long createdBy) {
+        return repository.searchByTitleAndCreatedBy(title, createdBy).stream().map(this::toResponse).toList();
     }
 
     @Override

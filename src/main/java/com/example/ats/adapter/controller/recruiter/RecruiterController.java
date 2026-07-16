@@ -1,13 +1,13 @@
-package com.example.ats.adapter.controller;
+package com.example.ats.adapter.controller.recruiter;
 
 import com.example.ats.application.dto.request.RecruiterRequest;
 import com.example.ats.application.dto.response.RecruiterResponse;
 import com.example.ats.application.port.in.RecruiterUseCase;
 import com.example.ats.domain.model.ApiResponse;
-import com.example.ats.domain.model.User;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -35,8 +35,8 @@ public class RecruiterController {
     @GetMapping("profile")
     public ResponseEntity<ApiResponse<RecruiterResponse>> findProfile(Authentication authentication) {
         // recruiter.id dùng chung khóa chính với user.id (xem RecruiterEntity#user @MapsId)
-        Long id = ((User) authentication.getPrincipal()).getId();
-        return ResponseEntity.ok(new ApiResponse<>("success", recruiterUseCase.findById(id)));
+        Number userId = ((Jwt) authentication.getPrincipal()).getClaim("userId");
+        return ResponseEntity.ok(new ApiResponse<>("success", recruiterUseCase.findById(userId.longValue())));
     }
 
     @PatchMapping("{id}")
