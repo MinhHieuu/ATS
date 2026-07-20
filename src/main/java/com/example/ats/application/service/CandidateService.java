@@ -11,11 +11,12 @@ import com.example.ats.application.port.out.CandidateRepository;
 import com.example.ats.domain.model.Candidate;
 import com.example.ats.domain.model.Role;
 import com.example.ats.domain.view.CandidateView;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
-import java.util.List;
 
 @Service
 @Transactional
@@ -74,10 +75,8 @@ public class CandidateService implements CandidateUseCase {
     }
 
     @Override
-    public List<CandidateResponse> findAll() {
-        return repository.findAllWithUser().stream()
-                .map(this::toResponse)
-                .toList();
+    public Page<CandidateResponse> findAll(Pageable pageable) {
+        return repository.findAllWithUser(pageable).map(this::toResponse);
     }
 
       private CandidateResponse toResponse(CandidateView candidateWithUser) {

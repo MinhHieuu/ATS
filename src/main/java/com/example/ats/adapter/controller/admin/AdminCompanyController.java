@@ -5,6 +5,9 @@ import com.example.ats.application.dto.response.CompanyResponse;
 import com.example.ats.application.port.in.CompanyUseCase;
 import com.example.ats.domain.model.ApiResponse;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,8 +17,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/admin/companies")
@@ -33,13 +34,15 @@ public class AdminCompanyController {
     }
 
     @GetMapping("")
-    public ResponseEntity<ApiResponse<List<CompanyResponse>>> findAll() {
-        return ResponseEntity.ok(new ApiResponse<>("success", companyUseCase.findAll()));
+    public ResponseEntity<ApiResponse<Page<CompanyResponse>>> findAll(
+            @PageableDefault(size = 10, sort = "id") Pageable pageable) {
+        return ResponseEntity.ok(new ApiResponse<>("success", companyUseCase.findAll(pageable)));
     }
 
     @GetMapping("active")
-    public ResponseEntity<ApiResponse<List<CompanyResponse>>> findActive() {
-        return ResponseEntity.ok(new ApiResponse<>("success", companyUseCase.findActive()));
+    public ResponseEntity<ApiResponse<Page<CompanyResponse>>> findActive(
+            @PageableDefault(size = 10, sort = "id") Pageable pageable) {
+        return ResponseEntity.ok(new ApiResponse<>("success", companyUseCase.findActive(pageable)));
     }
 
     @GetMapping("{id}")

@@ -3,18 +3,18 @@ package com.example.ats.application.port.out;
 import com.example.ats.domain.model.Job;
 import com.example.ats.domain.model.JobStatus;
 import com.example.ats.domain.view.JobView;
-
-import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 public interface JobRepository {
     JobView save(Job job);
     JobView findById(Long id);
-    List<JobView> findAll();
-    List<JobView> finByStatus(JobStatus status);
-    List<JobView> findByStatusNot(JobStatus status);
-    List<JobView> findByCreatedBy(Long createdBy);
-    List<JobView> searchByTitle(String title);
-    List<JobView> searchByTitleAndStatusNot(String title, JobStatus status);
-    List<JobView> searchByTitleAndCreatedBy(String title, Long createdBy);
+    Page<JobView> findAll(Pageable pageable);
+    Page<JobView> finByStatus(JobStatus status, Pageable pageable);
+    Page<JobView> findByStatusNot(JobStatus status, Pageable pageable);
+    Page<JobView> findByCreatedBy(Long createdBy, Pageable pageable);
+    Page<JobView> searchByTitle(String title, Pageable pageable);
+    Page<JobView> searchByTitleAndStatusNot(String title, JobStatus status, Pageable pageable);
+    Page<JobView> searchByTitleAndCreatedBy(String title, Long createdBy, Pageable pageable);
     void deleteById(Long id);
 }

@@ -1,12 +1,15 @@
 package com.example.ats.infrastructure.persistence.repository;
 
 import com.example.ats.infrastructure.persistence.entity.RecruiterEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
-import java.util.List;
-
 public interface SpringDataRecruiterRepository extends JpaRepository<RecruiterEntity, Long> {
-    @Query("select recruiter from RecruiterEntity recruiter join fetch recruiter.user left join fetch recruiter.company")
-    List<RecruiterEntity> findAllWithUser();
+    @EntityGraph(attributePaths = {"user", "company"})
+    @Query(value = "select r from RecruiterEntity r",
+            countQuery = "select count(r) from RecruiterEntity r")
+    Page<RecruiterEntity> findAllWithUser(Pageable pageable);
 }

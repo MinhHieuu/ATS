@@ -2,45 +2,51 @@ package com.example.ats.infrastructure.persistence.repository;
 
 import com.example.ats.domain.model.JobStatus;
 import com.example.ats.infrastructure.persistence.entity.JobEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import java.util.List;
 import java.util.Optional;
 
 public interface SpringDataJobRepository extends JpaRepository<JobEntity, Long> {
     // JobAdapter.toView() doc cac field cua company nen proxy luon phai khoi tao.
-    // Fetch san company de tranh N+1; giu createdBy lazy vi toView chi can getId().
+    // Dung EntityGraph de vua fetch san company, vua ket hop duoc voi Pageable
+    // (join fetch trong @Query se roi khi ket hop firstResult/maxResults).
 
     @Override
-    @Query("select j from JobEntity j join fetch j.company")
-    List<JobEntity> findAll();
+    @EntityGraph(attributePaths = "company")
+    Page<JobEntity> findAll(Pageable pageable);
 
     @Override
-    @Query("select j from JobEntity j join fetch j.company where j.id = :id")
-    Optional<JobEntity> findById(@Param("id") Long id);
+    @EntityGraph(attributePaths = "company")
+    Optional<JobEntity> findById(Long id);
 
-    @Query("select j from JobEntity j join fetch j.company where j.status = :status")
-    List<JobEntity> findByStatus(@Param("status") JobStatus status);
+    @EntityGraph(attributePaths = "company")
+    Page<JobEntity> findByStatus(JobStatus status, Pageable pageable);
 
-    @Query("select j from JobEntity j join fetch j.company where j.status <> :status")
-    List<JobEntity> findByStatusNot(@Param("status") JobStatus status);
+    @EntityGraph(attributePaths = "company")
+    Page<JobEntity> findByStatusNot(JobStatus status, Pageable pageable);
 
-    @Query("select j from JobEntity j join fetch j.company where j.createdBy.id = :createdById")
-    List<JobEntity> findByCreatedBy_Id(@Param("createdById") Long createdById);
+    @EntityGraph(attributePaths = "company")
+    @Query(value = "select j from JobEntity j where j.createdBy.id = :createdById",
+            countQuery = "select count(j) from JobEntity j where j.createdBy.id = :createdById")
+    Page<JobEntity> findByCreatedBy_Id(@Param("createdById") Long createdById, Pageable pageable);
 
-    @Query("select j from JobEntity j join fetch j.company "
-            + "where lower(j.title) like lower(concat('%', :title, '%'))")
-    List<JobEntity> findByTitleContainingIgnoreCase(@Param("title") String title);
+    @EntityGraph(attributePaths = "company")
+    Page<JobEntity> findByTitleContainingIgnoreCase(String title, Pageable pageable);
 
-    @Query("select j from JobEntity j join fetch j.company "
-            + "where lower(j.title) like lower(concat('%', :title, '%')) and j.status <> :status")
-    List<JobEntity> findByTitleContainingIgnoreCaseAndStatusNot(@Param("title") String title,
-                                                                @Param("status") JobStatus status);
+    @EntityGraph(attributePaths = "company")
+    Page<JobEntity> findByTitleContainingIgnoreCaseAndStatusNot(String title, JobStatus status, Pageable pageable);
 
-    @Query("select j from JobEntity j join fetch j.company "
-            + "where lower(j.title) like lower(concat('%', :title, '%')) and j.createdBy.id = :createdById")
-    List<JobEntity> findByTitleContainingIgnoreCaseAndCreatedBy_Id(@Param("title") String title,
-                                                                   @Param("createdById") Long createdById);
+    @EntityGraph(attributePaths = "company")
+    @Query(value = "select j from JobEntity j "
+            + "where lower(j.title) like lower(concat(:title, '%')) and j.createdBy.id = :createdById",
+            countQuery = "select count(j) from JobEntity j "
+            + "where lower(j.title) like lower(concat(:title, '%')) and j.createdBy.id = :createdById")
+    Page<JobEntity> findByTitleContainingIgnoreCaseAndCreatedBy_Id(@Param("title") String title,
+                                                                   @Param("createdById") Long createdById,
+                                                                   Pageable pageable);
 }

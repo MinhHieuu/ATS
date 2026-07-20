@@ -15,9 +15,9 @@ import com.example.ats.infrastructure.persistence.entity.UserEntity;
 import com.example.ats.infrastructure.persistence.repository.SpringDataCompanyRepository;
 import com.example.ats.infrastructure.persistence.repository.SpringDataRecruiterRepository;
 import com.example.ats.infrastructure.persistence.repository.SpringDataUserRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
-
-import java.util.List;
 
 @Repository
 public class RecruiterAdapter implements RecruiterRepository {
@@ -62,13 +62,12 @@ public class RecruiterAdapter implements RecruiterRepository {
 
 
     @Override
-    public List<RecruiterView> findAllWithUser() {
-        return repository.findAllWithUser().stream()
+    public Page<RecruiterView> findAllWithUser(Pageable pageable) {
+        return repository.findAllWithUser(pageable)
                 .map(entity -> new RecruiterView(
                         toRecruiter(entity),
                         toUser(entity.getUser()),
-                        toCompany(entity.getCompany())))
-                .toList();
+                        toCompany(entity.getCompany())));
     }
 
     private Recruiter toRecruiter(RecruiterEntity entity) {

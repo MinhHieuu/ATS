@@ -38,15 +38,17 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
     private String[] witeList =new String[] {
-            "api/auth/login", "/api/auth/register", "/api/auth/register/recruiter", "/api/auth/login",
+            "api/auth/login", "/api/auth/register", "/api/auth/register/recruiter", "/api/auth/logout",
             "/api/auth/refresh-token", "/uploads/**", "/api/files/**", "/api/jobs/**", "/", "/api/companies/**",
-            "/api/jobs", "/api/companies"
+            "/api/jobs", "/api/companies", "/api/companies/**"
     };
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.
                 csrf(c -> c.disable())
                 .cors(Customizer.withDefaults())
+                .headers(headers ->
+                        headers.frameOptions(frame -> frame.disable()))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .exceptionHandling(exception -> exception.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)))
                 .formLogin(form -> form.disable())
@@ -55,6 +57,7 @@ public class SecurityConfig {
                         .requestMatchers(witeList).permitAll()
                         .requestMatchers("/api/admin/**").hasAnyRole("ADMIN", "admin")
                         .requestMatchers("/api/recruiter/**").hasAnyRole("RECRUITER", "ADMIN", "admin", "recruiter")
+                        .requestMatchers("/api/applications/**").hasAnyRole("CANDIDATE", "candidate")
                         .anyRequest().authenticated())
                 .oauth2ResourceServer(
                         oauth2 -> oauth2.jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter())));

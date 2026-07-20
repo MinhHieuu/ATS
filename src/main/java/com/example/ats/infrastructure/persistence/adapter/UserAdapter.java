@@ -2,10 +2,13 @@ package com.example.ats.infrastructure.persistence.adapter;
 
 import com.example.ats.application.port.out.UserRepository;
 import com.example.ats.domain.exception.ResourceNotFoundException;
+import com.example.ats.domain.model.Role;
 import com.example.ats.domain.model.User;
 import com.example.ats.infrastructure.persistence.entity.UserEntity;
 import com.example.ats.infrastructure.persistence.repository.SpringDataUserRepository;
 import jakarta.persistence.EntityNotFoundException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -37,6 +40,16 @@ public class UserAdapter implements UserRepository {
         return userRepository.findById(id)
                 .map(this::toUser)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
+    }
+
+    @Override
+    public Page<User> findAll(Pageable pageable) {
+        return userRepository.findAll(pageable).map(this::toUser);
+    }
+
+    @Override
+    public Page<User> searchByFullnameOrEmailAndRole(String keyword, Role role, Pageable pageable) {
+        return userRepository.searchByFullnameOrEmailAndRole(keyword, role, pageable).map(this::toUser);
     }
 
     @Override

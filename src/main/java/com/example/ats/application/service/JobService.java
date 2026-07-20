@@ -10,11 +10,12 @@ import com.example.ats.domain.exception.ResourceNotFoundException;
 import com.example.ats.domain.model.Job;
 import com.example.ats.domain.model.JobStatus;
 import com.example.ats.domain.view.JobView;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
-import java.util.List;
 
 @Service
 @Transactional
@@ -83,33 +84,33 @@ public class JobService implements JobUseCase {
     }
 
     @Override
-    public List<JobResponse> findAll() {
-        return repository.findAll().stream().map(this::toResponse).toList();
+    public Page<JobResponse> findAll(Pageable pageable) {
+        return repository.findAll(pageable).map(this::toResponse);
     }
 
     @Override
-    public List<JobResponse> findAllNotClosed() {
-        return repository.findByStatusNot(JobStatus.CLOSED).stream().map(this::toResponse).toList();
+    public Page<JobResponse> findAllNotClosed(Pageable pageable) {
+        return repository.findByStatusNot(JobStatus.CLOSED, pageable).map(this::toResponse);
     }
 
     @Override
-    public List<JobResponse> findByCreatedBy(Long createdBy) {
-        return repository.findByCreatedBy(createdBy).stream().map(this::toResponse).toList();
+    public Page<JobResponse> findByCreatedBy(Long createdBy, Pageable pageable) {
+        return repository.findByCreatedBy(createdBy, pageable).map(this::toResponse);
     }
 
     @Override
-    public List<JobResponse> searchByTitle(String title) {
-        return repository.searchByTitle(title).stream().map(this::toResponse).toList();
+    public Page<JobResponse> searchByTitle(String title, Pageable pageable) {
+        return repository.searchByTitle(title, pageable).map(this::toResponse);
     }
 
     @Override
-    public List<JobResponse> searchByTitleNotClosed(String title) {
-        return repository.searchByTitleAndStatusNot(title, JobStatus.CLOSED).stream().map(this::toResponse).toList();
+    public Page<JobResponse> searchByTitleNotClosed(String title, Pageable pageable) {
+        return repository.searchByTitleAndStatusNot(title, JobStatus.CLOSED, pageable).map(this::toResponse);
     }
 
     @Override
-    public List<JobResponse> searchByTitleAndCreatedBy(String title, Long createdBy) {
-        return repository.searchByTitleAndCreatedBy(title, createdBy).stream().map(this::toResponse).toList();
+    public Page<JobResponse> searchByTitleAndCreatedBy(String title, Long createdBy, Pageable pageable) {
+        return repository.searchByTitleAndCreatedBy(title, createdBy, pageable).map(this::toResponse);
     }
 
     @Override

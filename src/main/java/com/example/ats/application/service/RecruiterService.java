@@ -13,10 +13,10 @@ import com.example.ats.application.port.out.RecruiterRepository;
 import com.example.ats.domain.model.Recruiter;
 import com.example.ats.domain.model.Role;
 import com.example.ats.domain.view.RecruiterView;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 @Service
 @Transactional
@@ -74,10 +74,8 @@ public class RecruiterService implements RecruiterUseCase {
 
 
     @Override
-    public List<RecruiterResponse> findAll() {
-        return repository.findAllWithUser().stream()
-                .map(this::toResponse)
-                .toList();
+    public Page<RecruiterResponse> findAll(Pageable pageable) {
+        return repository.findAllWithUser(pageable).map(this::toResponse);
     }
 
     private RecruiterResponse toResponse(RecruiterView recruiterWithUser) {

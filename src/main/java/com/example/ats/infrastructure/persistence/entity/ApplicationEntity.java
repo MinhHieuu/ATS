@@ -27,6 +27,9 @@ public class ApplicationEntity {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "job_id", nullable = false)
     private JobEntity job;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "resume_id")
+    private ResumeEntity resume;
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 50)
     private ApplicationStatus status;

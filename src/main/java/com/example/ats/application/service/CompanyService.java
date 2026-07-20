@@ -5,12 +5,14 @@ import com.example.ats.application.dto.response.CompanyResponse;
 import com.example.ats.application.mapper.CompanyMapper;
 import com.example.ats.application.port.in.CompanyUseCase;
 import com.example.ats.application.port.out.CompanyRepository;
+import com.example.ats.domain.exception.ResourceNotFoundException;
 import com.example.ats.domain.model.Company;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
-import java.util.List;
 
 @Service
 @Transactional
@@ -75,17 +77,30 @@ public class CompanyService implements CompanyUseCase {
     }
 
     @Override
-    public List<CompanyResponse> findAll() {
-        return repository.findAll().stream()
-                .map(mapper::toResponse)
-                .toList();
+    @Transactional(readOnly = true)
+    public CompanyResponse findActiveById(Long id) {
+        Company company = repository.findById(id);
+        // Bao 404 thay vi 403 de khong lo ra su ton tai cua company da ngung hoat dong.
+        if (!Boolean.TRUE.equals(company.getIsActive())) {
+            throw new ResourceNotFoundException("Company not found");
+        }
+        return mapper.toResponse(company);
+    }
+
+    @Override
+    public Page<CompanyResponse> findAll(Pageable pageable) {
+        return repository.findAll(pageable).map(mapper::toResponse);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<CompanyResponse> findActive() {
-        return repository.findActive().stream()
-                .map(mapper::toResponse)
-                .toList();
+    public Page<CompanyResponse> findActive(Pageable pageable) {
+        return repository.findActive(pageable).map(mapper::toResponse);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<CompanyResponse> searchActiveByName(String name, Pageable pageable) {
+        return repository.searchByNameAndActive(name, pageable).map(mapper::toResponse);
     }
 }

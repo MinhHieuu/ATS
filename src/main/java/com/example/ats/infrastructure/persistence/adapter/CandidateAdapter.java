@@ -11,9 +11,9 @@ import com.example.ats.infrastructure.persistence.entity.CandidateEntity;
 import com.example.ats.infrastructure.persistence.entity.UserEntity;
 import com.example.ats.infrastructure.persistence.repository.SpringDataCandidateRepository;
 import com.example.ats.infrastructure.persistence.repository.SpringDataUserRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
-
-import java.util.List;
 
 @Repository
 public class CandidateAdapter implements CandidateRepository {
@@ -45,12 +45,11 @@ public class CandidateAdapter implements CandidateRepository {
     }
 
     @Override
-    public List<CandidateView> findAllWithUser() {
-        return repository.findAllWithUser().stream()
+    public Page<CandidateView> findAllWithUser(Pageable pageable) {
+        return repository.findAllWithUser(pageable)
                 .map(entity -> new CandidateView(
                         toCandidate(entity),
-                        toUser(entity.getUser())))
-                .toList();
+                        toUser(entity.getUser())));
     }
 
     private Candidate toCandidate(CandidateEntity entity) {

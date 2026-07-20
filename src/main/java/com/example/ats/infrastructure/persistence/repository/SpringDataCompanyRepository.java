@@ -1,10 +1,12 @@
 package com.example.ats.infrastructure.persistence.repository;
 
 import com.example.ats.infrastructure.persistence.entity.CompanyEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import java.util.List;
-
 public interface SpringDataCompanyRepository extends JpaRepository<CompanyEntity, Long> {
-    List<CompanyEntity> findByIsActiveTrue();
+    Page<CompanyEntity> findByIsActiveTrue(Pageable pageable);
+
+    Page<CompanyEntity> findByNameContainingIgnoreCaseAndIsActiveTrue(String name, Pageable pageable);
 }

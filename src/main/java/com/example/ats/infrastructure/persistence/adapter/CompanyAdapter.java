@@ -6,9 +6,9 @@ import com.example.ats.domain.exception.ResourceNotFoundException;
 import com.example.ats.domain.model.Company;
 import com.example.ats.infrastructure.persistence.entity.CompanyEntity;
 import com.example.ats.infrastructure.persistence.repository.SpringDataCompanyRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
-
-import java.util.List;
 
 @Repository
 public class CompanyAdapter implements CompanyRepository {
@@ -42,16 +42,17 @@ public class CompanyAdapter implements CompanyRepository {
     }
 
     @Override
-    public List<Company> findAll() {
-        return repository.findAll().stream()
-                .map(mapper::toEntity)
-                .toList();
+    public Page<Company> findAll(Pageable pageable) {
+        return repository.findAll(pageable).map(mapper::toEntity);
     }
 
     @Override
-    public List<Company> findActive() {
-        return repository.findByIsActiveTrue().stream()
-                .map(mapper::toEntity)
-                .toList();
+    public Page<Company> findActive(Pageable pageable) {
+        return repository.findByIsActiveTrue(pageable).map(mapper::toEntity);
+    }
+
+    @Override
+    public Page<Company> searchByNameAndActive(String name, Pageable pageable) {
+        return repository.findByNameContainingIgnoreCaseAndIsActiveTrue(name, pageable).map(mapper::toEntity);
     }
 }

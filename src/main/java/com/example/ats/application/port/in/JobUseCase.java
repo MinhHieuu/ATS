@@ -2,8 +2,8 @@ package com.example.ats.application.port.in;
 
 import com.example.ats.application.dto.request.JobRequest;
 import com.example.ats.application.dto.response.JobResponse;
-
-import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 public interface JobUseCase {
     JobResponse create(JobRequest request);
@@ -12,11 +12,11 @@ public interface JobUseCase {
     JobResponse deactivate(Long id);
     JobResponse findById(Long id);
     JobResponse findByIdNotClosed(Long id);
-    List<JobResponse> findAll();
-    List<JobResponse> findAllNotClosed();
-    List<JobResponse> findByCreatedBy(Long createdBy);
-    List<JobResponse> searchByTitle(String title);
-    List<JobResponse> searchByTitleNotClosed(String title);
-    List<JobResponse> searchByTitleAndCreatedBy(String title, Long createdBy);
+    Page<JobResponse> findAll(Pageable pageable);
+    Page<JobResponse> findAllNotClosed(Pageable pageable);
+    Page<JobResponse> findByCreatedBy(Long createdBy, Pageable pageable);
+    Page<JobResponse> searchByTitle(String title, Pageable pageable);
+    Page<JobResponse> searchByTitleNotClosed(String title, Pageable pageable);
+    Page<JobResponse> searchByTitleAndCreatedBy(String title, Long createdBy, Pageable pageable);
     void delete(Long id);
 }

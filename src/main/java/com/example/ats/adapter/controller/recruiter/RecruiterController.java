@@ -5,6 +5,9 @@ import com.example.ats.application.dto.response.RecruiterResponse;
 import com.example.ats.application.port.in.RecruiterUseCase;
 import com.example.ats.domain.model.ApiResponse;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -14,8 +17,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/recruiters")
@@ -28,8 +29,9 @@ public class RecruiterController {
 
 
     @GetMapping("")
-    public ResponseEntity<ApiResponse<List<RecruiterResponse>>> findAll() {
-        return ResponseEntity.ok(new ApiResponse<>("success", recruiterUseCase.findAll()));
+    public ResponseEntity<ApiResponse<Page<RecruiterResponse>>> findAll(
+            @PageableDefault(size = 10, sort = "id") Pageable pageable) {
+        return ResponseEntity.ok(new ApiResponse<>("success", recruiterUseCase.findAll(pageable)));
     }
 
     @GetMapping("profile")

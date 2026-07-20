@@ -15,6 +15,8 @@ import jakarta.transaction.Transactional;
 import java.time.Instant;
 import java.util.regex.Pattern;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -55,12 +57,24 @@ public class UserService implements UserUseCase {
         }
         Instant now = Instant.now();
         return mapper.toResponse(userRepository.save(new User(null, email, request.getFullname(), encode.encode(password),
-         request.getPhone(), "default-avatar.png", true, now, null, role)));
+         request.getPhone(), "default-avatar.jpg", true, now, null, role)));
     }
 
     @Override
     public UserResponse findById(Long id) {
         return mapper.toResponse(userRepository.findById(id));
+    }
+
+    @Override
+    public Page<UserResponse> findAll(Pageable pageable) {
+        return userRepository.findAll(pageable).map(mapper::toResponse);
+    }
+
+    @Override
+    public Page<UserResponse> searchByFullnameOrEmailAndRole(String keyword, Role role, Pageable pageable) {
+        // Keyword rong -> like '%%' -> tra ve tat ca, dung voi hanh vi o tim kiem khi chua go gi.
+        return userRepository.searchByFullnameOrEmailAndRole(trimToEmpty(keyword), role, pageable)
+                .map(mapper::toResponse);
     }
 
     @Override
@@ -74,6 +88,28 @@ public class UserService implements UserUseCase {
     public UserResponse update(Long id, UserRequest request) {
         User user = userRepository.findById(id);
         return updateUser(request, user);
+    }
+
+    @Override
+    public UserResponse activate(Long id) {
+        return updateActive(id, true);
+    }
+
+    @Override
+    public UserResponse deactivate(Long id, Long currentUserId) {
+        // Chan tu vo hieu hoa: AuthService khong cho user inactive dang nhap lai,
+        // nen admin tu deactivate se tu khoa minh vinh vien, khong cuu duoc qua API.
+        if (id.equals(currentUserId)) {
+            throw new BusinessRuleException("Cannot deactivate your own account");
+        }
+        return updateActive(id, false);
+    }
+
+    private UserResponse updateActive(Long id, boolean active) {
+        User user = userRepository.findById(id);
+        user.setActive(active);
+        user.setUpdatedAt(Instant.now());
+        return mapper.toResponse(userRepository.save(user));
     }
 
     private UserResponse updateUser(UserRequest request, User user) {

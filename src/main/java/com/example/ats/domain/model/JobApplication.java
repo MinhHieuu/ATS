@@ -14,6 +14,7 @@ public class JobApplication {
     private Long id;
     private Long candidateId;
     private Long jobId;
+    private Long resumeId;
     private ApplicationStatus status;
     private String source;
     private BigDecimal expectedSalary;

@@ -14,9 +14,9 @@ import com.example.ats.infrastructure.persistence.entity.UserEntity;
 import com.example.ats.infrastructure.persistence.repository.SpringDataCompanyRepository;
 import com.example.ats.infrastructure.persistence.repository.SpringDataJobRepository;
 import com.example.ats.infrastructure.persistence.repository.SpringDataUserRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
-
-import java.util.List;
 
 @Repository
 public class JobAdapter implements JobRepository {
@@ -57,39 +57,38 @@ public class JobAdapter implements JobRepository {
     }
 
     @Override
-    public List<JobView> findAll() {
-        return repository.findAll().stream().map(this::toView).toList();
+    public Page<JobView> findAll(Pageable pageable) {
+        return repository.findAll(pageable).map(this::toView);
     }
 
     @Override
-    public List<JobView> finByStatus(JobStatus status) {
-        return repository.findByStatus(status).stream().map(this::toView).toList();
+    public Page<JobView> finByStatus(JobStatus status, Pageable pageable) {
+        return repository.findByStatus(status, pageable).map(this::toView);
     }
 
     @Override
-    public List<JobView> findByStatusNot(JobStatus status) {
-        return repository.findByStatusNot(status).stream().map(this::toView).toList();
+    public Page<JobView> findByStatusNot(JobStatus status, Pageable pageable) {
+        return repository.findByStatusNot(status, pageable).map(this::toView);
     }
 
     @Override
-    public List<JobView> findByCreatedBy(Long createdBy) {
-        return repository.findByCreatedBy_Id(createdBy).stream().map(this::toView).toList();
+    public Page<JobView> findByCreatedBy(Long createdBy, Pageable pageable) {
+        return repository.findByCreatedBy_Id(createdBy, pageable).map(this::toView);
     }
 
     @Override
-    public List<JobView> searchByTitle(String title) {
-        return repository.findByTitleContainingIgnoreCase(title).stream().map(this::toView).toList();
+    public Page<JobView> searchByTitle(String title, Pageable pageable) {
+        return repository.findByTitleContainingIgnoreCase(title, pageable).map(this::toView);
     }
 
     @Override
-    public List<JobView> searchByTitleAndStatusNot(String title, JobStatus status) {
-        return repository.findByTitleContainingIgnoreCaseAndStatusNot(title, status).stream().map(this::toView).toList();
+    public Page<JobView> searchByTitleAndStatusNot(String title, JobStatus status, Pageable pageable) {
+        return repository.findByTitleContainingIgnoreCaseAndStatusNot(title, status, pageable).map(this::toView);
     }
 
     @Override
-    public List<JobView> searchByTitleAndCreatedBy(String title, Long createdBy) {
-        return repository.findByTitleContainingIgnoreCaseAndCreatedBy_Id(title, createdBy).stream()
-                .map(this::toView).toList();
+    public Page<JobView> searchByTitleAndCreatedBy(String title, Long createdBy, Pageable pageable) {
+        return repository.findByTitleContainingIgnoreCaseAndCreatedBy_Id(title, createdBy, pageable).map(this::toView);
     }
 
     @Override

@@ -5,11 +5,12 @@ import com.example.ats.application.dto.response.ResumeResponse;
 import com.example.ats.application.port.in.ResumeUseCase;
 import com.example.ats.domain.model.ApiResponse;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/resumes")
@@ -26,8 +27,9 @@ public class ResumeController {
     }
 
     @GetMapping
-    public ResponseEntity<ApiResponse<List<ResumeResponse>>> findAll() {
-        return ResponseEntity.ok(new ApiResponse<>("success", useCase.findAll()));
+    public ResponseEntity<ApiResponse<Page<ResumeResponse>>> findAll(
+            @PageableDefault(size = 10, sort = "id") Pageable pageable) {
+        return ResponseEntity.ok(new ApiResponse<>("success", useCase.findAll(pageable)));
     }
 
     @GetMapping("{id}")
@@ -36,8 +38,10 @@ public class ResumeController {
     }
 
     @GetMapping("candidate/{candidateId}")
-    public ResponseEntity<ApiResponse<List<ResumeResponse>>> findByCandidate(@PathVariable Long candidateId) {
-        return ResponseEntity.ok(new ApiResponse<>("success", useCase.findByCandidate(candidateId)));
+    public ResponseEntity<ApiResponse<Page<ResumeResponse>>> findByCandidate(
+            @PathVariable Long candidateId,
+            @PageableDefault(size = 10, sort = "id") Pageable pageable) {
+        return ResponseEntity.ok(new ApiResponse<>("success", useCase.findByCandidate(candidateId, pageable)));
     }
 
     @PatchMapping("{id}")

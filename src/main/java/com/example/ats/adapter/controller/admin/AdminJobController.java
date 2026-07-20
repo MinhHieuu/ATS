@@ -5,13 +5,14 @@ import com.example.ats.application.dto.response.JobResponse;
 import com.example.ats.application.port.in.JobUseCase;
 import com.example.ats.domain.model.ApiResponse;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RequestMapping("/api/admin/jobs")
 @RestController("adminJobController")
@@ -32,13 +33,16 @@ public class AdminJobController {
     }
 
     @GetMapping
-    public ResponseEntity<ApiResponse<List<JobResponse>>> findAll() {
-        return ResponseEntity.ok(new ApiResponse<>("success", jobUseCase.findAll()));
+    public ResponseEntity<ApiResponse<Page<JobResponse>>> findAll(
+            @PageableDefault(size = 10, sort = "id") Pageable pageable) {
+        return ResponseEntity.ok(new ApiResponse<>("success", jobUseCase.findAll(pageable)));
     }
 
     @GetMapping("search")
-    public ResponseEntity<ApiResponse<List<JobResponse>>> searchByTitle(@RequestParam String title) {
-        return ResponseEntity.ok(new ApiResponse<>("success", jobUseCase.searchByTitle(title)));
+    public ResponseEntity<ApiResponse<Page<JobResponse>>> searchByTitle(
+            @RequestParam String title,
+            @PageableDefault(size = 10, sort = "id") Pageable pageable) {
+        return ResponseEntity.ok(new ApiResponse<>("success", jobUseCase.searchByTitle(title, pageable)));
     }
 
     @PatchMapping("{id}/deactivate")
