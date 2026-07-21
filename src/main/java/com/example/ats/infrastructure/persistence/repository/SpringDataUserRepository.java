@@ -9,9 +9,13 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface SpringDataUserRepository extends JpaRepository<UserEntity, Long> {
+
+    @Query("SELECT u.id FROM UserEntity u WHERE u.role = :role")
+    List<Long> findIdsByRole(@Param("role") Role role);
     // UserEntity.candidate va UserEntity.recruiter la @OneToOne(mappedBy) nen mac dinh EAGER,
     // va phia nghich cua @OneToOne khong lazy-proxy duoc (Hibernate phai query moi biet null hay khong).
     // Dung EntityGraph de tach truy van count/data cho Pageable ma van fetch san 2 quan he,

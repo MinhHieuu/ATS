@@ -146,3 +146,19 @@ Bảng tổng hợp toàn bộ REST API, nhóm theo controller/tính năng. Khô
 | 64 | PATCH | `/api/admin/users/{id}/deactivate` | ADMIN | Vô hiệu hoá tài khoản (`active = false`) |
 | 65 | GET | `/api/admin/users/{id}` | ADMIN | Chi tiết user theo id |
 | 66 | GET | `/api/admin/users/search?keyword=&role=` | ADMIN | Tìm user theo fullname/email + role · 📄 Page |
+
+## 16. Notification — `/api/notifications`
+
+| # | Method | Path | Quyền | Mô tả |
+|---:|---|---|---|---|
+| 67 | GET | `/api/notifications` | Đăng nhập | Thông báo của tôi · 📄 Page |
+| 68 | GET | `/api/notifications/unread-count` | Đăng nhập | Số thông báo chưa đọc |
+| 69 | PATCH | `/api/notifications/{id}/read` | Đăng nhập | Đánh dấu đã đọc |
+| 70 | PATCH | `/api/notifications/read-all` | Đăng nhập | Đánh dấu tất cả đã đọc |
+
+## 17. WebSocket — `/ws`
+
+| Endpoint | Giao thức | Mô tả |
+|---|---|---|
+| `/ws` | STOMP over WebSocket + SockJS | Kết nối realtime, gửi token qua STOMP header `Authorization: Bearer <token>` |
+| `/user/queue/notifications` | STOMP subscribe | Nhận thông báo realtime cho user đang đăng nhập |

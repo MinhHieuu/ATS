@@ -8,6 +8,9 @@ import org.mapstruct.Mapping;
 
 @Mapper(componentModel = "spring")
 public interface JobApplicationMapper {
+    @Mapping(target = "candidate", ignore = true)
+    @Mapping(target = "job", ignore = true)
+    @Mapping(target = "resume", ignore = true)
     JobApplicationResponse toResponse(JobApplication application);
 
     @Mapping(source = "candidate.id", target = "candidateId")

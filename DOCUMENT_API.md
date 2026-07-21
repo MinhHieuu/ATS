@@ -87,10 +87,11 @@ Response **lỗi** **KHÔNG** dùng envelope trên, mà có cấu trúc riêng:
 |---|---|
 | `/api/auth/register`, `/api/auth/register/recruiter`, `/api/auth/login`, `/api/auth/refresh-token` | Public |
 | `/api/jobs/**`, `/api/files/**`, `/uploads/**`, `/api/companies/**`, `/` | Public |
+| `/ws/**` | Public (HTTP handshake) — xác thực qua STOMP header |
 | `/api/admin/**` | `ROLE_ADMIN` |
 | `/api/recruiter/**` | `ROLE_RECRUITER` hoặc `ROLE_ADMIN` |
 | `/api/applications/**` | `ROLE_CANDIDATE` |
-| Còn lại (`/api/users`, `/api/candidates`, `/api/recruiters`, `/api/resumes`) | Cần đăng nhập (mọi role) |
+| Còn lại (`/api/users`, `/api/candidates`, `/api/recruiters`, `/api/resumes`, `/api/notifications`) | Cần đăng nhập (mọi role) |
 
 > `POST /api/auth/logout` **không** nằm trong whitelist → phải gửi kèm `Authorization` header.
 
@@ -109,7 +110,7 @@ Methods: `GET, POST, PUT, PATCH, DELETE, OPTIONS`. Headers: `*`. `allowCredentia
 3. **Access token chỉ 5 phút** → bắt buộc có cơ chế refresh tự động khi gặp `401` (body rỗng).
 4. **Mọi `PATCH` đều là cập nhật toàn phần (behave như `PUT`)** — field không gửi sẽ bị set `null` hoặc `""`. Luôn merge dữ liệu cũ trước khi gửi.
 5. **`fullname` viết thường** trong response; request nhận cả `fullname` và `fullName` (`@JsonAlias`).
-6. **`avatar` (request) ↔ `avatarUrl` (response)** — tên field khác nhau. Tương tự **`companyId` (request) ↔ `company` object (response)**.
+6. **`avatar` (request) ↔ `avatarUrl` (response)** — tên field khác nhau. Tương tự **`companyId` (request) ↔ `company` object (response)**, **`createdBy` number (request) ↔ `createdBy` UserResponse (response)**.
 7. **Ảnh/file:** API chỉ trả **tên file**, FE tự ghép `{baseUrl}/uploads/{fileName}`.
 8. **`candidate.id` = `recruiter.id` = `user.id`** (`@MapsId`) — không cần map riêng.
 9. **`CandidateResponse` có field trùng lặp:** vừa có `user.email` vừa có `email` ở cấp ngoài (`fullname`, `phone` tương tự). `RecruiterResponse` **không** có.
@@ -118,6 +119,9 @@ Methods: `GET, POST, PUT, PATCH, DELETE, OPTIONS`. Headers: `*`. `allowCredentia
 12. **Đã có phân trang server-side** trên **mọi** endpoint list — response `data` giờ là **Spring `Page<T>`** (không phải mảng phẳng). FE bắt buộc đọc mảng qua `data.content` và tự truyền `?page=&size=&sort=`. Xem mục **1.8** để nắm quy ước phân trang chung.
 13. **Thiếu kiểm tra quyền sở hữu** ở `/api/resumes/**`, `/api/recruiters/{id}`, `PATCH /api/users`, `PATCH /api/recruiter/jobs/{id}` — FE không nên để lộ id của user khác trên UI.
 14. **Đăng ký không gửi `phone`** có thể gặp `409 Phone already exists` do hệ thống kiểm tra chuỗi rỗng đã tồn tại.
+15. **`JobApplicationResponse` giờ trả object lồng** — `candidate` (`CandidateResponse`), `job` (`JobResponse`), `resume` (`ResumeResponse`) thay vì `candidateId`/`jobId`/`resumeId`. FE không cần fetch thêm dữ liệu.
+16. **`JobResponse.createdBy` giờ là `UserResponse`** (object) thay vì `number`. FE cần đọc `response.createdBy.id` thay vì `response.createdBy`.
+17. **WebSocket realtime** — kết nối STOMP tại `/ws`, subscribe `/user/queue/notifications` để nhận thông báo. Xem mục 19.
 
 ---
 
@@ -211,6 +215,7 @@ Bảng dưới liệt kê **toàn bộ** endpoint list (đã phân trang server-
 | 59 | GET | `/api/admin/applications/candidate/{candidateId}` | `appliedAt,desc` |
 | 62 | GET | `/api/admin/users` | `id,asc` |
 | — | GET | `/api/admin/users/search` | `id,asc` |
+| 67 | GET | `/api/notifications` | `createdAt,desc` |
 
 > ⚠️ `sort` truyền lên phải là **tên field của entity JPA** (ví dụ `appliedAt`, `createdAt`, `fullname`), **không** phải tên cột SQL. Sai tên field → `500 PropertyReferenceException`.
 
@@ -224,6 +229,7 @@ Bảng dưới liệt kê **toàn bộ** endpoint list (đã phân trang server-
 | `JobStatus` | `OPEN`, `PAUSED`, `CLOSED` |
 | `EmploymentType` | `FULLTIME`, `PARTTIME` |
 | `ApplicationStatus` | `APPLICATION_CREATED`, `SCREENING`, `INTERVIEW`, `OFFER`, `HIRED`, `REJECTED`, `WITHDRAWN` |
+| `NotificationType` | `JOB_CREATED`, `APPLICATION_RECEIVED`, `APPLICATION_STATUS_CHANGED`, `APPLICATION_WITHDRAWN` |
 
 > Gửi giá trị enum sai (ví dụ `"FULL_TIME"`) → **400** với message `Malformed request or unsupported enum value`.
 > `ApplicationStatus` không đổi tuỳ tiện được — xem luồng chuyển trạng thái ở mục 16.1.
@@ -306,11 +312,11 @@ Bảng dưới liệt kê **toàn bộ** endpoint list (đã phân trang server-
 | `salaryMin` | number \| null | |
 | `salaryMax` | number \| null | |
 | `status` | `JobStatus` | |
-| `createdBy` | number \| null | `userId` của người tạo |
+| `createdBy` | `UserResponse` \| null | Object lồng — thông tin user tạo job |
 | `createdAt` | number | |
 | `updatedAt` | number \| null | |
 
-> **Bất đối xứng request/response:** request gửi lên `companyId` (number), response trả về `company` (object).
+> **Bất đối xứng request/response:** request gửi lên `companyId` (number) và `createdBy` (number), response trả về `company` (object) và `createdBy` (object).
 
 ### `ResumeResponse`
 
@@ -324,20 +330,32 @@ Bảng dưới liệt kê **toàn bộ** endpoint list (đã phân trang server-
 
 ### `JobApplicationResponse`
 
-| Field | Kiểu |
-|---|---|
-| `id` | number |
-| `candidateId` | number |
-| `jobId` | number |
-| `resumeId` | number \| null |
-| `status` | `ApplicationStatus` |
-| `source` | string \| null |
-| `expectedSalary` | number \| null |
-| `note` | string \| null |
-| `appliedAt` | number |
-| `updatedAt` | number \| null |
+| Field | Kiểu | Ghi chú |
+|---|---|---|
+| `id` | number | |
+| `candidate` | `CandidateResponse` | Object lồng — thông tin ứng viên (kèm `user`) |
+| `job` | `JobResponse` | Object lồng — thông tin job (kèm `company` và `createdBy`) |
+| `resume` | `ResumeResponse` \| null | Object lồng — CV đính kèm |
+| `status` | `ApplicationStatus` | |
+| `source` | string \| null | |
+| `expectedSalary` | number \| null | |
+| `note` | string \| null | |
+| `appliedAt` | number | |
+| `updatedAt` | number \| null | |
 
-> Response **phẳng** — chỉ trả id, không lồng object `job`/`candidate`/`resume`. FE cần chi tiết job thì gọi thêm `GET /api/jobs/{jobId}`.
+> Response trả về **object lồng** cho `candidate`, `job`, `resume` — FE không cần fetch thêm dữ liệu.
+
+### `NotificationResponse`
+
+| Field | Kiểu | Ghi chú |
+|---|---|---|
+| `id` | number | |
+| `type` | `NotificationType` | Loại thông báo |
+| `title` | string | Tiêu đề thông báo |
+| `content` | string \| null | Nội dung chi tiết |
+| `referenceId` | number \| null | ID tham chiếu: job ID (`JOB_CREATED`) hoặc application ID (các loại còn lại) |
+| `read` | boolean | Đã đọc chưa |
+| `createdAt` | number | epoch seconds |
 
 ### `LoginResponse`
 
@@ -772,7 +790,15 @@ Toàn bộ nhóm này **không cần token**, và **chỉ trả job có `status 
         "salaryMin": 20000000,
         "salaryMax": 35000000,
         "status": "OPEN",
-        "createdBy": 13,
+        "createdBy": {
+          "id": 13,
+          "email": "b.tran@example.com",
+          "fullname": "Tran Thi B",
+          "phone": "0900000002",
+          "avatarUrl": "default-avatar.png",
+          "active": true,
+          "role": "RECRUITER"
+        },
         "createdAt": 1750598400.000000000,
         "updatedAt": null
       }
@@ -1288,9 +1314,29 @@ Truy cập đơn không thuộc về mình trả về **`404` `Application not f
   "message": "create success",
   "data": {
     "id": 1,
-    "candidateId": 6,
-    "jobId": 3,
-    "resumeId": 1,
+    "candidate": {
+      "id": 6,
+      "user": {
+        "id": 6, "email": "a.nguyen@example.com", "fullname": "Nguyen Van A",
+        "phone": "0900000001", "avatarUrl": "default-avatar.png", "active": true, "role": "CANDIDATE"
+      },
+      "linkedinUrl": null, "githubUrl": null, "portfolioUrl": null,
+      "currentPosition": "Java Developer", "yearsOfExperience": 3,
+      "createdAt": 1750598400.000000000, "updatedAt": null,
+      "email": "a.nguyen@example.com", "fullname": "Nguyen Van A", "phone": "0900000001"
+    },
+    "job": {
+      "id": 3, "title": "Java Backend Developer", "description": "...", "requirements": "...",
+      "location": "Hà Nội", "employmentType": "FULLTIME",
+      "company": { "id": 1, "name": "FPT Software", "logo": "logo.png", "email": "contact@fpt.com", "website": "https://fpt.com", "description": "Công ty phần mềm", "address": "Hà Nội", "createdAt": 1750598400.000000000, "updatedAt": null, "isActive": true },
+      "salaryMin": 20000000, "salaryMax": 35000000, "status": "OPEN",
+      "createdBy": { "id": 13, "email": "b.tran@example.com", "fullname": "Tran Thi B", "phone": "0900000002", "avatarUrl": "default-avatar.png", "active": true, "role": "RECRUITER" },
+      "createdAt": 1750598400.000000000, "updatedAt": null
+    },
+    "resume": {
+      "id": 1, "candidateId": 6, "fileName": "CV_NguyenVanA.pdf",
+      "fileUrl": "b3f1c2d4-....pdf", "createdAt": 1750598400.000000000
+    },
     "status": "APPLICATION_CREATED",
     "source": "web",
     "expectedSalary": 1500,
@@ -1504,7 +1550,127 @@ Trả về **mọi** user thuộc mọi role (`ADMIN`, `RECRUITER`, `CANDIDATE`)
 
 ---
 
-## 18. Chức năng có model nhưng CHƯA có API
+## 18. Notification API — `/api/notifications`
+
+**Quyền:** Cần đăng nhập (mọi role). Mỗi user chỉ thấy thông báo gửi cho chính mình.
+
+### 18.1. `GET /api/notifications` — Danh sách thông báo của tôi
+
+**📄 Đã phân trang** (`page`, `size`, `sort` — xem mục 1.8, mặc định `sort=createdAt,desc`).
+
+**Response `200`:** `Page<NotificationResponse>` — mảng ở `data.content`.
+
+```json
+{
+  "message": "success",
+  "data": {
+    "content": [
+      {
+        "id": 1,
+        "type": "APPLICATION_RECEIVED",
+        "title": "Đơn ứng tuyển mới",
+        "content": "Nguyen Van A đã ứng tuyển vào job: Java Backend Developer",
+        "referenceId": 42,
+        "read": false,
+        "createdAt": 1750598400.000000000
+      }
+    ],
+    "totalElements": 5,
+    "totalPages": 1,
+    "number": 0,
+    "size": 10,
+    "first": true,
+    "last": true,
+    "empty": false
+  }
+}
+```
+
+### 18.2. `GET /api/notifications/unread-count` — Số thông báo chưa đọc
+
+**Response `200`:**
+
+```json
+{
+  "message": "success",
+  "data": { "count": 3 }
+}
+```
+
+### 18.3. `PATCH /api/notifications/{id}/read` — Đánh dấu đã đọc
+
+**Response `200`:** `NotificationResponse` với `read = true`.
+
+**Lỗi:** `404` `Notification not found` — id không tồn tại hoặc không phải thông báo của mình.
+
+### 18.4. `PATCH /api/notifications/read-all` — Đánh dấu tất cả đã đọc
+
+**Response `204 No Content`** — không có body.
+
+### 18.5. Loại thông báo và `referenceId`
+
+| `type` | Ai nhận | `referenceId` trỏ tới | Mô tả |
+|---|---|---|---|
+| `JOB_CREATED` | Admin | Job ID | Recruiter tạo job mới |
+| `APPLICATION_RECEIVED` | Recruiter (chủ job) + Admin | Application ID | Ứng viên ứng tuyển |
+| `APPLICATION_STATUS_CHANGED` | Candidate | Application ID | Recruiter/admin đổi trạng thái đơn |
+| `APPLICATION_WITHDRAWN` | Recruiter (chủ job) + Admin | Application ID | Ứng viên rút đơn |
+
+> FE dùng `type` + `referenceId` để điều hướng khi user click vào thông báo.
+
+---
+
+## 19. WebSocket — Thông báo realtime
+
+### 19.1. Kết nối
+
+| Thuộc tính | Giá trị |
+|---|---|
+| Endpoint | `/ws` (STOMP over WebSocket + SockJS fallback) |
+| CORS | `http://localhost:3000`, `http://127.0.0.1:3000` |
+| Xác thực | STOMP CONNECT header: `Authorization: Bearer <accessToken>` |
+
+### 19.2. Subscribe
+
+| Destination | Mô tả |
+|---|---|
+| `/user/queue/notifications` | Nhận `NotificationResponse` realtime cho user đang đăng nhập |
+
+### 19.3. Ví dụ kết nối FE (với `@stomp/stompjs`)
+
+```javascript
+import { Client } from '@stomp/stompjs';
+import SockJS from 'sockjs-client';
+
+const client = new Client({
+  webSocketFactory: () => new SockJS('http://localhost:8080/ws'),
+  connectHeaders: {
+    Authorization: `Bearer ${accessToken}`
+  },
+  onConnect: () => {
+    client.subscribe('/user/queue/notifications', (message) => {
+      const notification = JSON.parse(message.body);
+      // notification: NotificationResponse
+      // { id, type, title, content, referenceId, read, createdAt }
+    });
+  },
+  onStompError: (frame) => {
+    console.error('STOMP error:', frame.headers.message);
+  }
+});
+
+client.activate();
+
+// Ngắt kết nối khi unmount
+// client.deactivate();
+```
+
+> ⚠️ Token hết hạn → kết nối STOMP bị từ chối. FE nên refresh token trước khi reconnect.
+> ⚠️ Thông báo vẫn được **lưu vào DB** dù user không online — khi mở app, gọi `GET /api/notifications` để lấy thông báo đã bỏ lỡ.
+
+---
+
+## 20. Chức năng có model nhưng CHƯA có API
 
 Các thành phần sau đã tồn tại trong code nhưng **chưa được expose thành endpoint** — FE chưa thể tích hợp:
 

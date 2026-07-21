@@ -18,27 +18,27 @@ public interface SpringDataApplicationRepository extends JpaRepository<Applicati
     // job mo coi (createdBy null) khong khop voi ai nen tra ve 404.
 
     @Override
-    @EntityGraph(attributePaths = {"candidate", "job", "resume"})
+    @EntityGraph(attributePaths = {"candidate", "candidate.user", "job", "job.company", "job.createdBy", "resume"})
     Page<ApplicationEntity> findAll(Pageable pageable);
 
     @Override
-    @EntityGraph(attributePaths = {"candidate", "job", "resume"})
+    @EntityGraph(attributePaths = {"candidate", "candidate.user", "job", "job.company", "job.createdBy", "resume"})
     Optional<ApplicationEntity> findById(Long id);
 
     boolean existsByCandidate_IdAndJob_Id(Long candidateId, Long jobId);
 
-    @EntityGraph(attributePaths = {"candidate", "job", "resume"})
+    @EntityGraph(attributePaths = {"candidate", "candidate.user", "job", "job.company", "job.createdBy", "resume"})
     Page<ApplicationEntity> findByCandidate_Id(Long candidateId, Pageable pageable);
 
-    @EntityGraph(attributePaths = {"candidate", "job", "resume"})
+    @EntityGraph(attributePaths = {"candidate", "candidate.user", "job", "job.company", "job.createdBy", "resume"})
     Page<ApplicationEntity> findByJob_Id(Long jobId, Pageable pageable);
 
-    @EntityGraph(attributePaths = {"candidate", "job", "resume"})
+    @EntityGraph(attributePaths = {"candidate", "candidate.user", "job", "job.company", "job.createdBy", "resume"})
     @Query(value = "select a from ApplicationEntity a where a.job.createdBy.id = :createdById",
             countQuery = "select count(a) from ApplicationEntity a where a.job.createdBy.id = :createdById")
     Page<ApplicationEntity> findByJob_CreatedBy_Id(@Param("createdById") Long createdById, Pageable pageable);
 
-    @EntityGraph(attributePaths = {"candidate", "job", "resume"})
+    @EntityGraph(attributePaths = {"candidate", "candidate.user", "job", "job.company", "job.createdBy", "resume"})
     @Query(value = "select a from ApplicationEntity a "
             + "where a.job.id = :jobId and a.job.createdBy.id = :createdById",
             countQuery = "select count(a) from ApplicationEntity a "
@@ -47,12 +47,12 @@ public interface SpringDataApplicationRepository extends JpaRepository<Applicati
                                                             @Param("createdById") Long createdById,
                                                             Pageable pageable);
 
-    @EntityGraph(attributePaths = {"candidate", "job", "resume"})
+    @EntityGraph(attributePaths = {"candidate", "candidate.user", "job", "job.company", "job.createdBy", "resume"})
     @Query("select a from ApplicationEntity a where a.id = :id and a.job.createdBy.id = :createdById")
     Optional<ApplicationEntity> findByIdAndJob_CreatedBy_Id(@Param("id") Long id,
                                                             @Param("createdById") Long createdById);
 
-    @EntityGraph(attributePaths = {"candidate", "job", "resume"})
+    @EntityGraph(attributePaths = {"candidate", "candidate.user", "job", "job.company", "job.createdBy", "resume"})
     @Query("select a from ApplicationEntity a where a.id = :id and a.candidate.id = :candidateId")
     Optional<ApplicationEntity> findByIdAndCandidate_Id(@Param("id") Long id,
                                                         @Param("candidateId") Long candidateId);

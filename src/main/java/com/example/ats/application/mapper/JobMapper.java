@@ -8,6 +8,8 @@ import org.mapstruct.Mapping;
 
 @Mapper(componentModel = "spring")
 public interface JobMapper {
+    @Mapping(target = "createdBy", ignore = true)
+    @Mapping(target = "company", ignore = true)
     JobResponse toResponse(Job job);
 
     @Mapping(target = "createdBy", ignore = true)

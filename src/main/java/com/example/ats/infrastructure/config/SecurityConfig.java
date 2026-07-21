@@ -40,7 +40,7 @@ public class SecurityConfig {
     private String[] witeList =new String[] {
             "api/auth/login", "/api/auth/register", "/api/auth/register/recruiter", "/api/auth/logout",
             "/api/auth/refresh-token", "/uploads/**", "/api/files/**", "/api/jobs/**", "/", "/api/companies/**",
-            "/api/jobs", "/api/companies", "/api/companies/**"
+            "/api/jobs", "/api/companies", "/api/companies/**", "/ws/**", "ws/info"
     };
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {

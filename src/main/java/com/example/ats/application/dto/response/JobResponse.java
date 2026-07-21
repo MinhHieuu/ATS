@@ -25,7 +25,7 @@ public class JobResponse {
     private BigDecimal salaryMin;
     private BigDecimal salaryMax;
     private JobStatus status;
-    private Long createdBy;
+    private UserResponse createdBy;
     private Instant createdAt;
     private Instant updatedAt;
 }

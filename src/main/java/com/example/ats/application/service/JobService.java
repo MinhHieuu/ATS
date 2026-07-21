@@ -4,11 +4,14 @@ import com.example.ats.application.dto.request.JobRequest;
 import com.example.ats.application.dto.response.JobResponse;
 import com.example.ats.application.mapper.CompanyMapper;
 import com.example.ats.application.mapper.JobMapper;
+import com.example.ats.application.mapper.UserMapper;
 import com.example.ats.application.port.in.JobUseCase;
+import com.example.ats.application.port.in.NotificationUseCase;
 import com.example.ats.application.port.out.JobRepository;
 import com.example.ats.domain.exception.ResourceNotFoundException;
 import com.example.ats.domain.model.Job;
 import com.example.ats.domain.model.JobStatus;
+import com.example.ats.domain.model.NotificationType;
 import com.example.ats.domain.view.JobView;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -23,11 +26,16 @@ public class JobService implements JobUseCase {
     private final JobRepository repository;
     private final JobMapper mapper;
     private final CompanyMapper companyMapper;
+    private final UserMapper userMapper;
+    private final NotificationUseCase notificationUseCase;
 
-    public JobService(JobRepository repository, JobMapper mapper, CompanyMapper companyMapper) {
+    public JobService(JobRepository repository, JobMapper mapper, CompanyMapper companyMapper,
+                      UserMapper userMapper, NotificationUseCase notificationUseCase) {
         this.repository = repository;
         this.mapper = mapper;
         this.companyMapper = companyMapper;
+        this.userMapper = userMapper;
+        this.notificationUseCase = notificationUseCase;
     }
 
     @Override
@@ -37,7 +45,13 @@ public class JobService implements JobUseCase {
         Job job = new Job(null, request.getTitle(), request.getDescription(), request.getRequirements(),
                 request.getLocation(), request.getEmploymentType(), request.getCompanyId(),
                 request.getSalaryMin(), request.getSalaryMax(), status, request.getCreatedBy(), now, null);
-        return toResponse(repository.save(job));
+        JobView view = repository.save(job);
+        String creatorName = view.createdBy() != null ? view.createdBy().getFullname() : "Unknown";
+        notificationUseCase.sendToAdmins(NotificationType.JOB_CREATED,
+                "Job mới được tạo",
+                creatorName + " đã tạo job: " + view.job().getTitle(),
+                view.job().getId(), null);
+        return toResponse(view);
     }
 
     @Override
@@ -129,6 +143,9 @@ public class JobService implements JobUseCase {
         JobResponse response = mapper.toResponse(view.job());
         if (view.company() != null) {
             response.setCompany(companyMapper.toResponse(view.company()));
+        }
+        if (view.createdBy() != null) {
+            response.setCreatedBy(userMapper.toResponse(view.createdBy()));
         }
         return response;
     }

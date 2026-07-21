@@ -38,7 +38,7 @@ public class UserService implements UserUseCase {
     public UserResponse create(UserRequest request, Role role) {
         String email = trimToEmpty(request.getEmail());
         String password = trimToEmpty(request.getPassword());
-        String phone = trimToEmpty(request.getPhone());
+        String phone = trimToNull(request.getPhone());
         if (password.isEmpty()) {
             password = "password123";
         }
@@ -52,12 +52,12 @@ public class UserService implements UserUseCase {
         if(userRepository.existsByEmail(email)) {
             throw new BusinessRuleException("Email already exists");
         }
-        if(userRepository.existsByPhone(phone)) {
+        if(phone != null && userRepository.existsByPhone(phone)) {
             throw new BusinessRuleException("Phone already exists");
         }
         Instant now = Instant.now();
         return mapper.toResponse(userRepository.save(new User(null, email, request.getFullname(), encode.encode(password),
-         request.getPhone(), "default-avatar.jpg", true, now, null, role)));
+         phone, "default-avatar.jpg", true, now, null, role)));
     }
 
     @Override
@@ -114,7 +114,7 @@ public class UserService implements UserUseCase {
 
     private UserResponse updateUser(UserRequest request, User user) {
         user.setFullname(trimToEmpty(request.getFullname()));
-        user.setPhone(trimToEmpty(request.getPhone()));
+        user.setPhone(trimToNull(request.getPhone()));
         if(request.getAvatar() != null && !request.getAvatar().isEmpty()) {
             user.setAvatarUrl(request.getAvatar());
         }
@@ -151,5 +151,11 @@ public class UserService implements UserUseCase {
 
     private String trimToEmpty(String value) {
         return value == null ? "" : value.trim();
+    }
+
+    private String trimToNull(String value) {
+        if (value == null) return null;
+        String trimmed = value.trim();
+        return trimmed.isEmpty() ? null : trimmed;
     }
 }

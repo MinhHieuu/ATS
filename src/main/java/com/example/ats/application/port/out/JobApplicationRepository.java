@@ -1,19 +1,20 @@
 package com.example.ats.application.port.out;
 
 import com.example.ats.domain.model.JobApplication;
+import com.example.ats.domain.view.JobApplicationView;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 public interface JobApplicationRepository {
-    JobApplication save(JobApplication application);
-    JobApplication findById(Long id);
-    Page<JobApplication> findAll(Pageable pageable);
-    Page<JobApplication> findByCandidate(Long candidateId, Pageable pageable);
-    Page<JobApplication> findByJob(Long jobId, Pageable pageable);
-    Page<JobApplication> findByJobCreatedBy(Long createdBy, Pageable pageable);
-    Page<JobApplication> findByJobAndJobCreatedBy(Long jobId, Long createdBy, Pageable pageable);
-    JobApplication findByIdAndJobCreatedBy(Long id, Long createdBy);
-    JobApplication findByIdAndCandidate(Long id, Long candidateId);
+    JobApplicationView save(JobApplication application);
+    JobApplicationView findById(Long id);
+    Page<JobApplicationView> findAll(Pageable pageable);
+    Page<JobApplicationView> findByCandidate(Long candidateId, Pageable pageable);
+    Page<JobApplicationView> findByJob(Long jobId, Pageable pageable);
+    Page<JobApplicationView> findByJobCreatedBy(Long createdBy, Pageable pageable);
+    Page<JobApplicationView> findByJobAndJobCreatedBy(Long jobId, Long createdBy, Pageable pageable);
+    JobApplicationView findByIdAndJobCreatedBy(Long id, Long createdBy);
+    JobApplicationView findByIdAndCandidate(Long id, Long candidateId);
     boolean existsByCandidateAndJob(Long candidateId, Long jobId);
     void deleteById(Long id);
 }

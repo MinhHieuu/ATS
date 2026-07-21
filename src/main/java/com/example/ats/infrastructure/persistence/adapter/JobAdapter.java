@@ -2,11 +2,13 @@ package com.example.ats.infrastructure.persistence.adapter;
 
 import com.example.ats.application.mapper.CompanyMapper;
 import com.example.ats.application.mapper.JobMapper;
+import com.example.ats.application.mapper.UserMapper;
 import com.example.ats.application.port.out.JobRepository;
 import com.example.ats.domain.exception.ResourceNotFoundException;
 import com.example.ats.domain.model.Company;
 import com.example.ats.domain.model.Job;
 import com.example.ats.domain.model.JobStatus;
+import com.example.ats.domain.model.User;
 import com.example.ats.domain.view.JobView;
 import com.example.ats.infrastructure.persistence.entity.CompanyEntity;
 import com.example.ats.infrastructure.persistence.entity.JobEntity;
@@ -25,14 +27,17 @@ public class JobAdapter implements JobRepository {
     private final SpringDataUserRepository userRepository;
     private final JobMapper mapper;
     private final CompanyMapper companyMapper;
+    private final UserMapper userMapper;
 
     public JobAdapter(SpringDataJobRepository repository, SpringDataCompanyRepository companyRepository,
-                      SpringDataUserRepository userRepository, JobMapper mapper, CompanyMapper companyMapper) {
+                      SpringDataUserRepository userRepository, JobMapper mapper, CompanyMapper companyMapper,
+                      UserMapper userMapper) {
         this.repository = repository;
         this.companyRepository = companyRepository;
         this.userRepository = userRepository;
         this.mapper = mapper;
         this.companyMapper = companyMapper;
+        this.userMapper = userMapper;
     }
 
     @Override
@@ -102,10 +107,12 @@ public class JobAdapter implements JobRepository {
     private JobView toView(JobEntity entity) {
         Job job = mapper.toEntity(entity);
         job.setCompanyId(entity.getCompany().getId());
+        User createdBy = null;
         if (entity.getCreatedBy() != null) {
             job.setCreatedBy(entity.getCreatedBy().getId());
+            createdBy = userMapper.toEntity(entity.getCreatedBy());
         }
         Company company = companyMapper.toEntity(entity.getCompany());
-        return new JobView(company, job);
+        return new JobView(company, job, createdBy);
     }
 }

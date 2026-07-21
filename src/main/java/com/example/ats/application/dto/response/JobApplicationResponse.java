@@ -15,9 +15,9 @@ import java.time.Instant;
 @AllArgsConstructor
 public class JobApplicationResponse {
     private Long id;
-    private Long candidateId;
-    private Long jobId;
-    private Long resumeId;
+    private CandidateResponse candidate;
+    private JobResponse job;
+    private ResumeResponse resume;
     private ApplicationStatus status;
     private String source;
     private BigDecimal expectedSalary;

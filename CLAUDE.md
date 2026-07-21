@@ -75,7 +75,7 @@ MySQL
 ### Rules
 - Do not modify the model in the domain.
 - DTO user MapStruct
-- After completing an assigned task, summarize the changes made and update `API_DOCUMENT.md` and `GROUP_API.md` when the task changes API behavior, request/response fields, validation, security, or business workflow.
+- After completing an assigned task, summarize the changes made and update `DOCUMENT_API.md` and `GROUP_API.md` when the task changes API behavior, request/response fields, validation, security, or business workflow.
 The following testing rules apply to this project:
 
 - Do not generate or add automated test code.
