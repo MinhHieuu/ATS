@@ -1,5 +1,6 @@
 package com.example.ats.infrastructure.persistence.entity;
 
+import com.example.ats.domain.model.EmploymentType;
 import com.example.ats.domain.model.JobStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -29,8 +30,12 @@ public class JobEntity {
     private String requirements;
     @Column(length = 100)
     private String location;
-    @Column(name = "employment_type", length = 50)
-    private String employmentType;
+    @Column(name = "employment_type")
+    @Enumerated(EnumType.STRING)
+    private EmploymentType employmentType;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "company_id", nullable = false)
+    private CompanyEntity company;
     @Column(name = "salary_min", precision = 12, scale = 2)
     private BigDecimal salaryMin;
     @Column(name = "salary_max", precision = 12, scale = 2)
@@ -48,4 +53,21 @@ public class JobEntity {
     @OneToMany(mappedBy = "job")
     private List<ApplicationEntity> applications;
 
+    public JobEntity(Long id, String title, String description, String requirements, String location,
+                     EmploymentType employmentType, CompanyEntity company, BigDecimal salaryMin, BigDecimal salaryMax,
+                     JobStatus status, UserEntity createdBy, Instant createdAt, Instant updatedAt) {
+        this.id = id;
+        this.title = title;
+        this.description = description;
+        this.requirements = requirements;
+        this.location = location;
+        this.employmentType = employmentType;
+        this.company = company;
+        this.salaryMin = salaryMin;
+        this.salaryMax = salaryMax;
+        this.status = status;
+        this.createdBy = createdBy;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
+    }
 }

@@ -1,162 +1,164 @@
-# Group API
+# GROUP API — ATS (Applicant Tracking System)
 
-Tai lieu nay gom nhom cac API hien co trong du an ATS theo controller. Tat ca response chuan cua cac API nghiep vu dang co dang:
+Bảng tổng hợp toàn bộ REST API, nhóm theo controller/tính năng. Không mô tả chi tiết field/response — xem [DOCUMENT_API.md](DOCUMENT_API.md) để biết request/response schema, validation, mã lỗi.
 
-```json
-{
-  "message": "success",
-  "data": {}
-}
-```
+`📄 Page` = endpoint đã phân trang server-side (`Page<T>`, query `page`/`size`/`sort`) — xem mục 1.8 của `DOCUMENT_API.md`.
 
-Ghi chu: theo `SecurityConfig` hien tai, tat ca request dang duoc `permitAll()`, nen cac API chua bi chan boi Spring Security.
+---
 
-## 1. Auth API
+## 1. Auth — `/api/auth`
 
-Base path: `/api/auth`
+| # | Method | Path | Quyền | Mô tả |
+|---:|---|---|---|---|
+| 1 | POST | `/api/auth/register` | Public | Đăng ký ứng viên |
+| 2 | POST | `/api/auth/register/recruiter` | Public | Đăng ký nhà tuyển dụng |
+| 3 | POST | `/api/auth/login` | Public | Đăng nhập |
+| 4 | POST | `/api/auth/refresh-token` | Public | Cấp lại access token |
+| 5 | POST | `/api/auth/logout` | Đăng nhập | Thu hồi refresh token |
 
-| Method | Endpoint | Body chinh | Tac dung | Response chinh |
-|---|---|---|---|---|
-| `POST` | `/api/auth/register` | `fullName`, `email`, `phone`, `password`, `avatar`, `linkedinUrl`, `githubUrl`, `portfolioUrl`, `currentPosition`, `yearsOfExperience` | Dang ky tai khoan ung vien moi va tao ho so candidate tu thong tin gui len. | `CandidateResponse` |
-| `POST` | `/api/auth/register/recruiter` | `fullName`, `email`, `phone`, `password`, `avatar`, `companyId`, `position` | Dang ky tai khoan nha tuyen dung moi va gan recruiter voi cong ty neu co `companyId`. | `RecruiterResponse` |
-| `POST` | `/api/auth/login` | `email`, `password` | Dang nhap bang email/password, tra ve thong tin user kem access token va refresh token. | `LoginResponse` gom `user`, `accessToken`, `refreshToken` |
-| `POST` | `/api/auth/refresh-token` | `refreshToken` | Tao access token moi tu refresh token con hop le. | `AccessTokenResponse` gom `accessToken` |
-| `POST` | `/api/auth/logout` | `refreshToken` | Dang xuat bang cach vo hieu hoa/xoa refresh token. | `data = null` |
+## 2. User — `/api/users`
 
-## 2. Candidate API
+| # | Method | Path | Quyền | Mô tả |
+|---:|---|---|---|---|
+| 6 | PATCH | `/api/users/password` | Đăng nhập | Đổi mật khẩu |
+| 7 | PATCH | `/api/users` | Đăng nhập | Cập nhật thông tin user |
 
-Base path: `/api/candidates`
+## 3. File — `/api/files`, `/uploads`
 
-| Method | Endpoint | Body / Param chinh | Tac dung | Response chinh |
-|---|---|---|---|---|
-| `POST` | `/api/candidates` | `fullName`, `email`, `phone`, `password`, `avatar`, `linkedinUrl`, `githubUrl`, `portfolioUrl`, `currentPosition`, `yearsOfExperience` | Tao ho so ung vien moi. | `CandidateResponse` |
-| `GET` | `/api/candidates` | Khong co | Lay danh sach tat ca ung vien trong he thong. | `List<CandidateResponse>` |
-| `GET` | `/api/candidates/profile` | Code hien tai nhan `Long id` nhung chua gan `@RequestParam`/`@PathVariable` | Lay ho so cua mot ung vien theo `id`. Theo code hien tai, endpoint nay co the can bo sung cach lay `id` ro rang. | `CandidateResponse` |
-| `PATCH` | `/api/candidates` | `fullName`, `email`, `phone`, `password`, `avatar`, `linkedinUrl`, `githubUrl`, `portfolioUrl`, `currentPosition`, `yearsOfExperience` | Cap nhat ho so ung vien. Code hien tai dang tam gan `id = 1L`, nen se cap nhat candidate co id bang 1. | `CandidateResponse` |
+| # | Method | Path | Quyền | Mô tả |
+|---:|---|---|---|---|
+| 8 | POST | `/api/files/upload` | Public | Upload file |
+| 9 | GET | `/uploads/{fileName}` | Public | Tải file tĩnh |
 
-## 3. Recruiter API
+## 4. Job công khai — `/api/jobs`
 
-Base path: `/api/recruiters`
+| # | Method | Path | Quyền | Mô tả |
+|---:|---|---|---|---|
+| 10 | GET | `/api/jobs` | Public | Danh sách job chưa đóng · 📄 Page |
+| 11 | GET | `/api/jobs/search?title=` | Public | Tìm job theo tiêu đề · 📄 Page |
+| 12 | GET | `/api/jobs/{id}` | Public | Chi tiết job |
 
-| Method | Endpoint | Body / Param chinh | Tac dung | Response chinh |
-|---|---|---|---|---|
-| `GET` | `/api/recruiters` | Khong co | Lay danh sach tat ca nha tuyen dung. | `List<RecruiterResponse>` |
-| `GET` | `/api/recruiters/{userId}` | Path variable `userId` | Lay chi tiet mot nha tuyen dung theo userId. | `RecruiterResponse` |
-| `PATCH` | `/api/recruiters/{id}` | Path variable `id`; body gom `fullName`, `email`, `phone`, `password`, `avatar`, `companyId`, `position` | Cap nhat thong tin nha tuyen dung va thong tin user lien quan. | `RecruiterResponse` |
+## 5. Company công khai — `/api/companies`
 
-## 4. Company API
+| # | Method | Path | Quyền | Mô tả |
+|---:|---|---|---|---|
+| 13 | GET | `/api/companies` | Public | Danh sách công ty đang hoạt động · 📄 Page |
+| 14 | GET | `/api/companies/search?name=` | Public | Tìm công ty đang hoạt động theo tên · 📄 Page |
+| 15 | GET | `/api/companies/{id}` | Public | Chi tiết công ty đang hoạt động |
 
-Base path: `/api/companies`
+## 6. Candidate — `/api/candidates`
 
-| Method | Endpoint | Body / Param chinh | Tac dung | Response chinh |
-|---|---|---|---|---|
-| `POST` | `/api/companies` | `name`, `logo`, `email`, `website`, `description`, `address` | Tao cong ty moi trong he thong. | `CompanyResponse` |
-| `GET` | `/api/companies` | Khong co | Lay danh sach tat ca cong ty. | `List<CompanyResponse>` |
-| `GET` | `/api/companies/{id}` | Path variable `id` | Lay chi tiet cong ty theo id. | `CompanyResponse` |
-| `PATCH` | `/api/companies/{id}` | Path variable `id`; body gom `name`, `logo`, `email`, `website`, `description`, `address` | Cap nhat thong tin cong ty. | `CompanyResponse` |
+| # | Method | Path | Quyền | Mô tả |
+|---:|---|---|---|---|
+| 16 | POST | `/api/candidates` | Đăng nhập | Tạo ứng viên |
+| 17 | GET | `/api/candidates` | Đăng nhập | Danh sách ứng viên · 📄 Page |
+| 18 | GET | `/api/candidates/profile` | Đăng nhập | Hồ sơ ứng viên đang đăng nhập |
+| 19 | PATCH | `/api/candidates` | Đăng nhập | Cập nhật hồ sơ ứng viên |
 
-## 5. User API
+## 7. Resume — `/api/resumes`
 
-Base path: `/api/users`
+| # | Method | Path | Quyền | Mô tả |
+|---:|---|---|---|---|
+| 20 | POST | `/api/resumes` | Đăng nhập | Tạo CV |
+| 21 | GET | `/api/resumes` | Đăng nhập | Danh sách CV · 📄 Page |
+| 22 | GET | `/api/resumes/{id}` | Đăng nhập | Chi tiết CV |
+| 23 | GET | `/api/resumes/candidate/{candidateId}` | Đăng nhập | CV theo ứng viên · 📄 Page |
+| 24 | PATCH | `/api/resumes/{id}` | Đăng nhập | Cập nhật CV |
+| 25 | DELETE | `/api/resumes/{id}` | Đăng nhập | Xoá CV |
 
-| Method | Endpoint | Body / Param chinh | Tac dung | Response chinh |
-|---|---|---|---|---|
-| `PATCH` | `/api/users/password` | `oldPassword`, `newPassword`, `confirmPassword` | Doi mat khau user. Code hien tai co tham so `Long id` nhung chua gan annotation va dang tam gan `id = 1L`, nen API se doi mat khau cho user id 1. | `data = null` |
+## 8. Recruiter — `/api/recruiters`
 
-## 6. File API
+| # | Method | Path | Quyền | Mô tả |
+|---:|---|---|---|---|
+| 26 | GET | `/api/recruiters` | Đăng nhập | Danh sách recruiter · 📄 Page |
+| 27 | GET | `/api/recruiters/profile` | Đăng nhập | Hồ sơ recruiter đang đăng nhập |
+| 28 | PATCH | `/api/recruiters/{id}` | Đăng nhập | Cập nhật recruiter |
 
-Base path: `/api/files`
+## 9. Recruiter Job — `/api/recruiter/jobs`
 
-| Method | Endpoint | Body / Param chinh | Tac dung | Response chinh |
-|---|---|---|---|---|
-| `POST` | `/api/files/upload` | `multipart/form-data` voi field `file` | Upload file len storage cua server, phu hop de upload avatar, CV/resume hoac tai lieu lien quan. | `ApiResponse<String>` voi `data` la ten file luu DB; file empty tra `data: ""` |
+| # | Method | Path | Quyền | Mô tả |
+|---:|---|---|---|---|
+| 29 | POST | `/api/recruiter/jobs` | RECRUITER, ADMIN | Recruiter tạo job |
+| 30 | GET | `/api/recruiter/jobs` | RECRUITER, ADMIN | Job do mình tạo · 📄 Page |
+| 31 | GET | `/api/recruiter/jobs/search?title=` | RECRUITER, ADMIN | Tìm job của mình · 📄 Page |
+| 32 | PATCH | `/api/recruiter/jobs/{id}` | RECRUITER, ADMIN | Cập nhật job |
+| 33 | PATCH | `/api/recruiter/jobs/{id}/active` | RECRUITER, ADMIN | Mở job (`OPEN`) |
+| 34 | PATCH | `/api/recruiter/jobs/{id}/deactivate` | RECRUITER, ADMIN | Đóng job (`CLOSED`) |
 
-## 7. Resume API
+## 10. Admin Job — `/api/admin/jobs`
 
-Base path: `/api/resumes`
+| # | Method | Path | Quyền | Mô tả |
+|---:|---|---|---|---|
+| 35 | POST | `/api/admin/jobs` | ADMIN | Admin tạo job |
+| 36 | GET | `/api/admin/jobs` | ADMIN | Tất cả job (kể cả `CLOSED`) · 📄 Page |
+| 37 | GET | `/api/admin/jobs/search?title=` | ADMIN | Tìm job (kể cả `CLOSED`) · 📄 Page |
+| 38 | PATCH | `/api/admin/jobs/{id}` | ADMIN | Cập nhật job |
+| 39 | PATCH | `/api/admin/jobs/{id}/active` | ADMIN | Mở job |
+| 40 | PATCH | `/api/admin/jobs/{id}/deactivate` | ADMIN | Đóng job |
 
-| Method | Endpoint | Body / Param chinh | Tac dung | Response chinh |
-|---|---|---|---|---|
-| `POST` | `/api/resumes` | `candidateId`, `fileName`, `fileUrl` | Tao resume moi cho candidate. | `ResumeResponse` |
-| `GET` | `/api/resumes` | Khong co | Lay danh sach tat ca resume. | `List<ResumeResponse>` |
-| `GET` | `/api/resumes/{id}` | Path variable `id` | Lay chi tiet resume theo id. | `ResumeResponse` |
-| `GET` | `/api/resumes/candidate/{candidateId}` | Path variable `candidateId` | Lay danh sach resume cua mot candidate. | `List<ResumeResponse>` |
-| `PATCH` | `/api/resumes/{id}` | Path variable `id`; body gom `candidateId`, `fileName`, `fileUrl` | Cap nhat resume. | `ResumeResponse` |
-| `DELETE` | `/api/resumes/{id}` | Path variable `id` | Xoa resume. | `data = null` |
+## 11. Admin Company — `/api/admin/companies`
 
-## 8. Job API
+| # | Method | Path | Quyền | Mô tả |
+|---:|---|---|---|---|
+| 41 | POST | `/api/admin/companies` | ADMIN | Tạo công ty |
+| 42 | GET | `/api/admin/companies` | ADMIN | Tất cả công ty · 📄 Page |
+| 43 | GET | `/api/admin/companies/active` | ADMIN | Công ty đang hoạt động · 📄 Page |
+| 44 | GET | `/api/admin/companies/{id}` | ADMIN | Chi tiết công ty (kể cả đã ngưng) |
+| 45 | PATCH | `/api/admin/companies/{id}` | ADMIN | Cập nhật công ty |
+| 46 | PATCH | `/api/admin/companies/{id}/active` | ADMIN | Kích hoạt công ty |
+| 47 | PATCH | `/api/admin/companies/{id}/deactivate` | ADMIN | Ngưng hoạt động công ty |
 
-Base path: `/api/jobs`
+## 12. Application — Candidate — `/api/applications`
 
-| Method | Endpoint | Body / Param chinh | Tac dung | Response chinh |
-|---|---|---|---|---|
-| `POST` | `/api/jobs` | `title`, `description`, `requirements`, `location`, `employmentType`, `salaryMin`, `salaryMax`, `status`, `createdBy` | Tao job moi. | `JobResponse` |
-| `GET` | `/api/jobs` | Khong co | Lay danh sach tat ca job. | `List<JobResponse>` |
-| `GET` | `/api/jobs/{id}` | Path variable `id` | Lay chi tiet job theo id. | `JobResponse` |
-| `PATCH` | `/api/jobs/{id}` | Path variable `id`; body nhu tao job | Cap nhat job. | `JobResponse` |
-| `DELETE` | `/api/jobs/{id}` | Path variable `id` | Xoa job. | `data = null` |
+| # | Method | Path | Quyền | Mô tả |
+|---:|---|---|---|---|
+| 48 | POST | `/api/applications` | CANDIDATE | Ứng tuyển vào job |
+| 49 | GET | `/api/applications` | CANDIDATE | Đơn ứng tuyển của chính mình · 📄 Page |
+| 50 | GET | `/api/applications/{id}` | CANDIDATE | Chi tiết đơn của chính mình |
+| 51 | PATCH | `/api/applications/{id}/withdraw` | CANDIDATE | Rút đơn ứng tuyển |
 
-## 9. Job Application API
+## 13. Application — Recruiter — `/api/recruiter/applications`
 
-Base path: `/api/applications`
+| # | Method | Path | Quyền | Mô tả |
+|---:|---|---|---|---|
+| 52 | GET | `/api/recruiter/applications` | RECRUITER, ADMIN | Đơn ứng tuyển vào job do mình tạo · 📄 Page |
+| 53 | GET | `/api/recruiter/applications/job/{jobId}` | RECRUITER, ADMIN | Đơn theo job (chỉ job của mình) · 📄 Page |
+| 54 | GET | `/api/recruiter/applications/{id}` | RECRUITER, ADMIN | Chi tiết đơn (chỉ job của mình) |
+| 55 | PATCH | `/api/recruiter/applications/{id}/status` | RECRUITER, ADMIN | Chuyển trạng thái đơn |
 
-| Method | Endpoint | Body / Param chinh | Tac dung | Response chinh |
-|---|---|---|---|---|
-| `POST` | `/api/applications` | `candidateId`, `jobId`, `stageId`, `status`, `source`, `expectedSalary`, `note` | Tao don ung tuyen moi. | `JobApplicationResponse` |
-| `GET` | `/api/applications` | Query optional `candidateId`, `jobId` | Lay danh sach application; neu co query thi loc theo candidate hoac job. | `List<JobApplicationResponse>` |
-| `GET` | `/api/applications/{id}` | Path variable `id` | Lay chi tiet application theo id. | `JobApplicationResponse` |
-| `GET` | `/api/applications/candidate/{candidateId}` | Path variable `candidateId` | Lay application theo candidate. | `List<JobApplicationResponse>` |
-| `GET` | `/api/applications/job/{jobId}` | Path variable `jobId` | Lay application theo job. | `List<JobApplicationResponse>` |
-| `PATCH` | `/api/applications/{id}` | Path variable `id`; body nhu tao application | Cap nhat application. | `JobApplicationResponse` |
-| `PATCH` | `/api/applications/{id}/status` | Path variable `id`; body `status`, `stageId` | Doi trang thai va stage cua application. | `JobApplicationResponse` |
-| `DELETE` | `/api/applications/{id}` | Path variable `id` | Xoa application. | `data = null` |
+## 14. Application — Admin — `/api/admin/applications`
 
-## 10. Application Stage API
+| # | Method | Path | Quyền | Mô tả |
+|---:|---|---|---|---|
+| 56 | GET | `/api/admin/applications` | ADMIN | Tất cả đơn ứng tuyển · 📄 Page |
+| 57 | GET | `/api/admin/applications/{id}` | ADMIN | Chi tiết đơn bất kỳ |
+| 58 | GET | `/api/admin/applications/job/{jobId}` | ADMIN | Đơn theo job bất kỳ · 📄 Page |
+| 59 | GET | `/api/admin/applications/candidate/{candidateId}` | ADMIN | Đơn theo ứng viên · 📄 Page |
+| 60 | PATCH | `/api/admin/applications/{id}/status` | ADMIN | Chuyển trạng thái đơn |
+| 61 | DELETE | `/api/admin/applications/{id}` | ADMIN | Xoá đơn ứng tuyển |
 
-Base path: `/api/application-stages`
+## 15. Admin User — `/api/admin/users`
 
-| Method | Endpoint | Body / Param chinh | Tac dung | Response chinh |
-|---|---|---|---|---|
-| `POST` | `/api/application-stages` | `name`, `position` | Tao stage moi cho pipeline ung tuyen. | `ApplicationStageResponse` |
-| `GET` | `/api/application-stages` | Khong co | Lay danh sach stage. | `List<ApplicationStageResponse>` |
-| `GET` | `/api/application-stages/{id}` | Path variable `id` | Lay stage theo id. | `ApplicationStageResponse` |
-| `PATCH` | `/api/application-stages/{id}` | Path variable `id`; body `name`, `position` | Cap nhat stage. | `ApplicationStageResponse` |
-| `DELETE` | `/api/application-stages/{id}` | Path variable `id` | Xoa stage. | `data = null` |
+| # | Method | Path | Quyền | Mô tả |
+|---:|---|---|---|---|
+| 62 | GET | `/api/admin/users` | ADMIN | Danh sách tất cả người dùng · 📄 Page |
+| 63 | PATCH | `/api/admin/users/{id}/active` | ADMIN | Kích hoạt tài khoản (`active = true`) |
+| 64 | PATCH | `/api/admin/users/{id}/deactivate` | ADMIN | Vô hiệu hoá tài khoản (`active = false`) |
+| 65 | GET | `/api/admin/users/{id}` | ADMIN | Chi tiết user theo id |
+| 66 | GET | `/api/admin/users/search?keyword=&role=` | ADMIN | Tìm user theo fullname/email + role · 📄 Page |
 
-## 11. Interview API
+## 16. Notification — `/api/notifications`
 
-Base path: `/api/interviews`
+| # | Method | Path | Quyền | Mô tả |
+|---:|---|---|---|---|
+| 67 | GET | `/api/notifications` | Đăng nhập | Thông báo của tôi · 📄 Page |
+| 68 | GET | `/api/notifications/unread-count` | Đăng nhập | Số thông báo chưa đọc |
+| 69 | PATCH | `/api/notifications/{id}/read` | Đăng nhập | Đánh dấu đã đọc |
+| 70 | PATCH | `/api/notifications/read-all` | Đăng nhập | Đánh dấu tất cả đã đọc |
 
-| Method | Endpoint | Body / Param chinh | Tac dung | Response chinh |
-|---|---|---|---|---|
-| `POST` | `/api/interviews` | `jobApplicationId`, `interviewerId`, `title`, `interviewTime`, `location`, `status` | Tao lich phong van. | `InterviewResponse` |
-| `GET` | `/api/interviews` | Khong co | Lay danh sach interview. | `List<InterviewResponse>` |
-| `GET` | `/api/interviews/{id}` | Path variable `id` | Lay interview theo id. | `InterviewResponse` |
-| `GET` | `/api/interviews/application/{applicationId}` | Path variable `applicationId` | Lay interview theo application. | `List<InterviewResponse>` |
-| `PATCH` | `/api/interviews/{id}` | Path variable `id`; body nhu tao interview | Cap nhat interview. | `InterviewResponse` |
-| `PATCH` | `/api/interviews/{id}/status` | Path variable `id`; body `status` | Doi trang thai interview. | `InterviewResponse` |
-| `DELETE` | `/api/interviews/{id}` | Path variable `id` | Xoa interview. | `data = null` |
+## 17. WebSocket — `/ws`
 
-## 12. Interview Feedback API
-
-Base path: `/api/interview-feedbacks`
-
-| Method | Endpoint | Body / Param chinh | Tac dung | Response chinh |
-|---|---|---|---|---|
-| `POST` | `/api/interview-feedbacks` | `interviewId`, `recruiterId`, `rating`, `comment`, `recommendation` | Tao feedback cho buoi phong van. | `InterviewFeedbackResponse` |
-| `GET` | `/api/interview-feedbacks` | Khong co | Lay danh sach feedback. | `List<InterviewFeedbackResponse>` |
-| `GET` | `/api/interview-feedbacks/{id}` | Path variable `id` | Lay feedback theo id. | `InterviewFeedbackResponse` |
-| `PATCH` | `/api/interview-feedbacks/{id}` | Path variable `id`; body nhu tao feedback | Cap nhat feedback. | `InterviewFeedbackResponse` |
-| `DELETE` | `/api/interview-feedbacks/{id}` | Path variable `id` | Xoa feedback. | `data = null` |
-
-## 13. Activity Log API
-
-Base path: `/api/activity-logs`
-
-| Method | Endpoint | Body / Param chinh | Tac dung | Response chinh |
-|---|---|---|---|---|
-| `POST` | `/api/activity-logs` | `userId`, `action`, `entityType`, `entityId`, `description` | Tao activity log. | `ActivityLogResponse` |
-| `GET` | `/api/activity-logs` | Khong co | Lay danh sach activity log. | `List<ActivityLogResponse>` |
-| `GET` | `/api/activity-logs/{id}` | Path variable `id` | Lay activity log theo id. | `ActivityLogResponse` |
-| `GET` | `/api/activity-logs/user/{userId}` | Path variable `userId` | Lay activity log theo user. | `List<ActivityLogResponse>` |
-| `DELETE` | `/api/activity-logs/{id}` | Path variable `id` | Xoa activity log. | `data = null` |
+| Endpoint | Giao thức | Mô tả |
+|---|---|---|
+| `/ws` | STOMP over WebSocket + SockJS | Kết nối realtime, gửi token qua STOMP header `Authorization: Bearer <token>` |
+| `/user/queue/notifications` | STOMP subscribe | Nhận thông báo realtime cho user đang đăng nhập |

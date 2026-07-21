@@ -8,9 +8,9 @@ import com.example.ats.infrastructure.persistence.entity.CandidateEntity;
 import com.example.ats.infrastructure.persistence.entity.ResumeEntity;
 import com.example.ats.infrastructure.persistence.repository.SpringDataCandidateRepository;
 import com.example.ats.infrastructure.persistence.repository.SpringDataResumeRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
-
-import java.util.List;
 
 @Repository
 public class ResumeAdapter implements ResumeRepository {
@@ -45,13 +45,13 @@ public class ResumeAdapter implements ResumeRepository {
     }
 
     @Override
-    public List<Resume> findAll() {
-        return repository.findAll().stream().map(mapper::toDomain).toList();
+    public Page<Resume> findAll(Pageable pageable) {
+        return repository.findAll(pageable).map(mapper::toDomain);
     }
 
     @Override
-    public List<Resume> findByCandidate(Long candidateId) {
-        return repository.findByCandidate_Id(candidateId).stream().map(mapper::toDomain).toList();
+    public Page<Resume> findByCandidate(Long candidateId, Pageable pageable) {
+        return repository.findByCandidate_Id(candidateId, pageable).map(mapper::toDomain);
     }
 
     @Override

@@ -12,11 +12,11 @@ import com.example.ats.application.port.in.UserUseCase;
 import com.example.ats.application.port.out.RecruiterRepository;
 import com.example.ats.domain.model.Recruiter;
 import com.example.ats.domain.model.Role;
-import com.example.ats.domain.result.RecruiterResult;
+import com.example.ats.domain.view.RecruiterView;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 @Service
 @Transactional
@@ -72,19 +72,13 @@ public class RecruiterService implements RecruiterUseCase {
         return toResponse(repository.findById(id));
     }
 
-    @Override
-    public RecruiterResponse findByUserId(Long userId) {
-        return toResponse(repository.findByUserId(userId));
-    }
 
     @Override
-    public List<RecruiterResponse> findAll() {
-        return repository.findAllWithUser().stream()
-                .map(this::toResponse)
-                .toList();
+    public Page<RecruiterResponse> findAll(Pageable pageable) {
+        return repository.findAllWithUser(pageable).map(this::toResponse);
     }
 
-    private RecruiterResponse toResponse(RecruiterResult recruiterWithUser) {
+    private RecruiterResponse toResponse(RecruiterView recruiterWithUser) {
         RecruiterResponse response = mapper.toResponse(recruiterWithUser.recruiter());
         response.setUser(userMapper.toResponse(recruiterWithUser.user()));
         if (recruiterWithUser.company() != null) {

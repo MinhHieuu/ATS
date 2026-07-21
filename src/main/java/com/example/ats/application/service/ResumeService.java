@@ -6,11 +6,12 @@ import com.example.ats.application.mapper.ResumeMapper;
 import com.example.ats.application.port.in.ResumeUseCase;
 import com.example.ats.application.port.out.ResumeRepository;
 import com.example.ats.domain.model.Resume;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
-import java.util.List;
 
 @Service
 @Transactional
@@ -46,14 +47,14 @@ public class ResumeService implements ResumeUseCase {
 
     @Override
     @Transactional(readOnly = true)
-    public List<ResumeResponse> findAll() {
-        return repository.findAll().stream().map(mapper::toResponse).toList();
+    public Page<ResumeResponse> findAll(Pageable pageable) {
+        return repository.findAll(pageable).map(mapper::toResponse);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<ResumeResponse> findByCandidate(Long candidateId) {
-        return repository.findByCandidate(candidateId).stream().map(mapper::toResponse).toList();
+    public Page<ResumeResponse> findByCandidate(Long candidateId, Pageable pageable) {
+        return repository.findByCandidate(candidateId, pageable).map(mapper::toResponse);
     }
 
     @Override

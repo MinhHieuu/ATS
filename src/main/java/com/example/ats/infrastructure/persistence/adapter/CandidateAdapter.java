@@ -6,14 +6,14 @@ import com.example.ats.application.port.out.CandidateRepository;
 import com.example.ats.domain.exception.ResourceNotFoundException;
 import com.example.ats.domain.model.Candidate;
 import com.example.ats.domain.model.User;
-import com.example.ats.domain.result.CandidateResult;
+import com.example.ats.domain.view.CandidateView;
 import com.example.ats.infrastructure.persistence.entity.CandidateEntity;
 import com.example.ats.infrastructure.persistence.entity.UserEntity;
 import com.example.ats.infrastructure.persistence.repository.SpringDataCandidateRepository;
 import com.example.ats.infrastructure.persistence.repository.SpringDataUserRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
-
-import java.util.List;
 
 @Repository
 public class CandidateAdapter implements CandidateRepository {
@@ -45,18 +45,11 @@ public class CandidateAdapter implements CandidateRepository {
     }
 
     @Override
-    public Candidate findByUserId(Long userId) {
-        return toCandidate(repository.findByUserId(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("Candidate not found")));
-    }
-
-    @Override
-    public List<CandidateResult> findAllWithUser() {
-        return repository.findAllWithUser().stream()
-                .map(entity -> new CandidateResult(
+    public Page<CandidateView> findAllWithUser(Pageable pageable) {
+        return repository.findAllWithUser(pageable)
+                .map(entity -> new CandidateView(
                         toCandidate(entity),
-                        toUser(entity.getUser())))
-                .toList();
+                        toUser(entity.getUser())));
     }
 
     private Candidate toCandidate(CandidateEntity entity) {

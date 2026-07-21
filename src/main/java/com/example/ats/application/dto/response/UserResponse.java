@@ -1,5 +1,6 @@
 package com.example.ats.application.dto.response;
 
+import com.example.ats.domain.model.Role;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -15,5 +16,6 @@ public class UserResponse {
     private String fullname;
     private String phone;
     private String avatarUrl;
-    
+    private Boolean active;
+    private Role role;
 }

@@ -91,7 +91,8 @@ class ApplicationFlowIntegrationTest {
                                 }
                                 """.formatted(candidate.get("id").asText(), job.get("id").asText())))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.data.status").value("APPLIED"));
+                .andExpect(jsonPath("$.data.status").value("APPLICATION_CREATED"))
+                .andExpect(jsonPath("$.data.source").value("CAREER_SITE"));
 
         mockMvc.perform(get("/api/applications")
                         .header("Authorization", "Bearer " + accessToken)

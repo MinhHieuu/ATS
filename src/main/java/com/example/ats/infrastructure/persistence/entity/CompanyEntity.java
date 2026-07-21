@@ -35,11 +35,13 @@ public class CompanyEntity {
     private Instant createdAt;
     @Column(name = "update_at")
     private Instant updatedAt;
+    @Column(name = "is_active", nullable = false)
+    private Boolean isActive;
     @OneToMany(mappedBy = "company")
     private List<RecruiterEntity> recruiters;
 
     public CompanyEntity(Long id, String name, String logo, String email, String website,
-                         String description, String address, Instant createdAt, Instant updatedAt) {
+                         String description, String address, Instant createdAt, Instant updatedAt, Boolean isActive) {
         this.id = id;
         this.name = name;
         this.logo = logo;
@@ -49,5 +51,6 @@ public class CompanyEntity {
         this.address = address;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
+        this.isActive = isActive;
     }
 }

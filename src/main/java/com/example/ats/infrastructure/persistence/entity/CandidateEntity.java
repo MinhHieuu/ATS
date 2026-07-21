@@ -17,10 +17,10 @@ import java.util.List;
 @NoArgsConstructor
 public class CandidateEntity {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @OneToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "user_id", nullable = false)
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id")
+    @MapsId
     private UserEntity user;
     @Column(name = "linkedin_url", length = 255)
     private String linkedinUrl;

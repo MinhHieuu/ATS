@@ -21,4 +21,5 @@ public class CompanyResponse {
     private String address;
     private Instant createdAt;
     private Instant updatedAt;
+    private Boolean isActive;
 }

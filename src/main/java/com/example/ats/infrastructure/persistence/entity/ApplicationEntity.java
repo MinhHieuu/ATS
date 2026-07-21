@@ -10,7 +10,6 @@ import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.Instant;
-import java.util.List;
 
 @Entity
 @Table(name = "applications")
@@ -29,11 +28,13 @@ public class ApplicationEntity {
     @JoinColumn(name = "job_id", nullable = false)
     private JobEntity job;
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "stage_id")
-    private ApplicationStageEntity stage;
+    @JoinColumn(name = "resume_id")
+    private ResumeEntity resume;
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 50)
     private ApplicationStatus status;
+    @Column(length = 100)
+    private String source;
     @Column(name = "expected_salary", precision = 12, scale = 2)
     private BigDecimal expectedSalary;
     @Column(columnDefinition = "TEXT")
@@ -42,6 +43,4 @@ public class ApplicationEntity {
     private Instant appliedAt;
     @Column(name = "updated_at")
     private Instant updatedAt;
-    @OneToMany(mappedBy = "application")
-    private List<InterviewEntity> interviews;
 }

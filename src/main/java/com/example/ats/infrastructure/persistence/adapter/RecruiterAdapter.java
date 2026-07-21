@@ -8,16 +8,16 @@ import com.example.ats.domain.exception.ResourceNotFoundException;
 import com.example.ats.domain.model.Company;
 import com.example.ats.domain.model.Recruiter;
 import com.example.ats.domain.model.User;
-import com.example.ats.domain.result.RecruiterResult;
+import com.example.ats.domain.view.RecruiterView;
 import com.example.ats.infrastructure.persistence.entity.CompanyEntity;
 import com.example.ats.infrastructure.persistence.entity.RecruiterEntity;
 import com.example.ats.infrastructure.persistence.entity.UserEntity;
 import com.example.ats.infrastructure.persistence.repository.SpringDataCompanyRepository;
 import com.example.ats.infrastructure.persistence.repository.SpringDataRecruiterRepository;
 import com.example.ats.infrastructure.persistence.repository.SpringDataUserRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
-
-import java.util.List;
 
 @Repository
 public class RecruiterAdapter implements RecruiterRepository {
@@ -60,20 +60,14 @@ public class RecruiterAdapter implements RecruiterRepository {
                 .orElseThrow(() -> new ResourceNotFoundException("Recruiter not found")));
     }
 
-    @Override
-    public Recruiter findByUserId(Long userId) {
-        return toRecruiter(repository.findByUserId(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("Recruiter not found with user id: " + userId)));
-    }
 
     @Override
-    public List<RecruiterResult> findAllWithUser() {
-        return repository.findAllWithUser().stream()
-                .map(entity -> new RecruiterResult(
+    public Page<RecruiterView> findAllWithUser(Pageable pageable) {
+        return repository.findAllWithUser(pageable)
+                .map(entity -> new RecruiterView(
                         toRecruiter(entity),
                         toUser(entity.getUser()),
-                        toCompany(entity.getCompany())))
-                .toList();
+                        toCompany(entity.getCompany())));
     }
 
     private Recruiter toRecruiter(RecruiterEntity entity) {

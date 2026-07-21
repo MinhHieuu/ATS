@@ -1,10 +1,10 @@
 package com.example.ats.domain.model;
 
 public enum ApplicationStatus {
-    APPLIED,
+    APPLICATION_CREATED,
     SCREENING,
     INTERVIEW,
-    OFFERED,
+    OFFER,
     HIRED,
     REJECTED,
     WITHDRAWN

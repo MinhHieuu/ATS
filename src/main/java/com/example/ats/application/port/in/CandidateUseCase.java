@@ -2,14 +2,12 @@ package com.example.ats.application.port.in;
 
 import com.example.ats.application.dto.request.CandidateRequest;
 import com.example.ats.application.dto.response.CandidateResponse;
-
-import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 public interface CandidateUseCase {
     CandidateResponse create(CandidateRequest request);
     CandidateResponse update(CandidateRequest request, Long id);
-    CandidateResponse updateByUserId(CandidateRequest request, Long userId);
     CandidateResponse findById(Long id);
-    CandidateResponse findByUserId(Long userId);
-    List<CandidateResponse> findAll();
+    Page<CandidateResponse> findAll(Pageable pageable);
 }
