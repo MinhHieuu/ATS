@@ -45,6 +45,13 @@ public class AdminJobController {
         return ResponseEntity.ok(new ApiResponse<>("success", jobUseCase.searchByTitle(title, pageable)));
     }
 
+    @GetMapping("category/{categoryId}")
+    public ResponseEntity<ApiResponse<Page<JobResponse>>> findByCategory(
+            @PathVariable Long categoryId,
+            @PageableDefault(size = 10, sort = "id") Pageable pageable) {
+        return ResponseEntity.ok(new ApiResponse<>("success", jobUseCase.findByCategory(categoryId, pageable)));
+    }
+
     @PatchMapping("{id}/deactivate")
     public ResponseEntity<ApiResponse<JobResponse>> deactivate(@PathVariable Long id) {
         return ResponseEntity.ok(new ApiResponse<>("success", jobUseCase.deactivate(id)));

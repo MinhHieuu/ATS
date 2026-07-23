@@ -36,6 +36,10 @@ public class JobEntity {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "company_id", nullable = false)
     private CompanyEntity company;
+    // Nullable de cac job da ton tai truoc khi co bang categories khong bi vo du lieu.
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "category_id")
+    private CategoryEntity category;
     @Column(name = "salary_min", precision = 12, scale = 2)
     private BigDecimal salaryMin;
     @Column(name = "salary_max", precision = 12, scale = 2)
@@ -54,7 +58,8 @@ public class JobEntity {
     private List<ApplicationEntity> applications;
 
     public JobEntity(Long id, String title, String description, String requirements, String location,
-                     EmploymentType employmentType, CompanyEntity company, BigDecimal salaryMin, BigDecimal salaryMax,
+                     EmploymentType employmentType, CompanyEntity company, CategoryEntity category,
+                     BigDecimal salaryMin, BigDecimal salaryMax,
                      JobStatus status, UserEntity createdBy, Instant createdAt, Instant updatedAt) {
         this.id = id;
         this.title = title;
@@ -63,6 +68,7 @@ public class JobEntity {
         this.location = location;
         this.employmentType = employmentType;
         this.company = company;
+        this.category = category;
         this.salaryMin = salaryMin;
         this.salaryMax = salaryMax;
         this.status = status;

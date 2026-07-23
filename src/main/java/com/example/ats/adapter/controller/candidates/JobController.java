@@ -31,6 +31,14 @@ public class JobController {
         return ResponseEntity.ok(new ApiResponse<>("success", jobUseCase.searchByTitleNotClosed(title, pageable)));
     }
 
+    @GetMapping("category/{categoryId}")
+    public ResponseEntity<ApiResponse<Page<JobResponse>>> findByCategory(
+            @PathVariable Long categoryId,
+            @PageableDefault(size = 10, sort = "id") Pageable pageable) {
+        return ResponseEntity.ok(new ApiResponse<>("success",
+                jobUseCase.findByCategoryNotClosed(categoryId, pageable)));
+    }
+
     @GetMapping("{id}")
     public ResponseEntity<ApiResponse<JobResponse>> findById(@PathVariable Long id) {
         return ResponseEntity.ok(new ApiResponse<>("success", jobUseCase.findByIdNotClosed(id)));

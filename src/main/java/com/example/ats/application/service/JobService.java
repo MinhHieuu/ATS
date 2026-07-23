@@ -2,13 +2,17 @@ package com.example.ats.application.service;
 
 import com.example.ats.application.dto.request.JobRequest;
 import com.example.ats.application.dto.response.JobResponse;
+import com.example.ats.application.mapper.CategoryMapper;
 import com.example.ats.application.mapper.CompanyMapper;
 import com.example.ats.application.mapper.JobMapper;
 import com.example.ats.application.mapper.UserMapper;
 import com.example.ats.application.port.in.JobUseCase;
 import com.example.ats.application.port.in.NotificationUseCase;
+import com.example.ats.application.port.out.CategoryRepository;
 import com.example.ats.application.port.out.JobRepository;
+import com.example.ats.domain.exception.BusinessRuleException;
 import com.example.ats.domain.exception.ResourceNotFoundException;
+import com.example.ats.domain.model.Category;
 import com.example.ats.domain.model.Job;
 import com.example.ats.domain.model.JobStatus;
 import com.example.ats.domain.model.NotificationType;
@@ -24,18 +28,35 @@ import java.time.Instant;
 @Transactional
 public class JobService implements JobUseCase {
     private final JobRepository repository;
+    private final CategoryRepository categoryRepository;
     private final JobMapper mapper;
     private final CompanyMapper companyMapper;
+    private final CategoryMapper categoryMapper;
     private final UserMapper userMapper;
     private final NotificationUseCase notificationUseCase;
 
-    public JobService(JobRepository repository, JobMapper mapper, CompanyMapper companyMapper,
-                      UserMapper userMapper, NotificationUseCase notificationUseCase) {
+    public JobService(JobRepository repository, CategoryRepository categoryRepository, JobMapper mapper,
+                      CompanyMapper companyMapper, CategoryMapper categoryMapper, UserMapper userMapper,
+                      NotificationUseCase notificationUseCase) {
         this.repository = repository;
+        this.categoryRepository = categoryRepository;
         this.mapper = mapper;
         this.companyMapper = companyMapper;
+        this.categoryMapper = categoryMapper;
         this.userMapper = userMapper;
         this.notificationUseCase = notificationUseCase;
+    }
+
+    @Override
+    public JobResponse createByRecruiter(JobRequest request) {
+        validateCategoryActive(request.getCategoryId());
+        return create(request);
+    }
+
+    @Override
+    public JobResponse updateByRecruiter(Long id, JobRequest request) {
+        validateCategoryActive(request.getCategoryId());
+        return update(id, request);
     }
 
     @Override
@@ -43,7 +64,7 @@ public class JobService implements JobUseCase {
         Instant now = Instant.now();
         JobStatus status = request.getStatus() != null ? request.getStatus() : JobStatus.OPEN;
         Job job = new Job(null, request.getTitle(), request.getDescription(), request.getRequirements(),
-                request.getLocation(), request.getEmploymentType(), request.getCompanyId(),
+                request.getLocation(), request.getEmploymentType(), request.getCompanyId(), request.getCategoryId(),
                 request.getSalaryMin(), request.getSalaryMax(), status, request.getCreatedBy(), now, null);
         JobView view = repository.save(job);
         String creatorName = view.createdBy() != null ? view.createdBy().getFullname() : "Unknown";
@@ -63,6 +84,7 @@ public class JobService implements JobUseCase {
         job.setLocation(request.getLocation());
         job.setEmploymentType(request.getEmploymentType());
         job.setCompanyId(request.getCompanyId());
+        job.setCategoryId(request.getCategoryId());
         job.setSalaryMin(request.getSalaryMin());
         job.setSalaryMax(request.getSalaryMax());
         if (request.getStatus() != null) {
@@ -128,8 +150,34 @@ public class JobService implements JobUseCase {
     }
 
     @Override
+    public Page<JobResponse> findByCategory(Long categoryId, Pageable pageable) {
+        return repository.findByCategory(categoryId, pageable).map(this::toResponse);
+    }
+
+    @Override
+    public Page<JobResponse> findByCategoryNotClosed(Long categoryId, Pageable pageable) {
+        return repository.findByCategoryAndStatusNot(categoryId, JobStatus.CLOSED, pageable).map(this::toResponse);
+    }
+
+    @Override
+    public Page<JobResponse> findByCategoryAndCreatedBy(Long categoryId, Long createdBy, Pageable pageable) {
+        return repository.findByCategoryAndCreatedBy(categoryId, createdBy, pageable).map(this::toResponse);
+    }
+
+    @Override
     public void delete(Long id) {
         repository.deleteById(id);
+    }
+
+    // Recruiter chi duoc chon category dang mo; admin khong bi rang buoc nay.
+    private void validateCategoryActive(Long categoryId) {
+        if (categoryId == null) {
+            return;
+        }
+        Category category = categoryRepository.findById(categoryId);
+        if (!Boolean.TRUE.equals(category.getIsActive())) {
+            throw new BusinessRuleException("Category is no longer available");
+        }
     }
 
     private JobResponse updateStatus(Long id, JobStatus status) {
@@ -146,6 +194,9 @@ public class JobService implements JobUseCase {
         }
         if (view.createdBy() != null) {
             response.setCreatedBy(userMapper.toResponse(view.createdBy()));
+        }
+        if (view.category() != null) {
+            response.setCategory(categoryMapper.toResponse(view.category()));
         }
         return response;
     }

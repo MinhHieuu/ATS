@@ -16,5 +16,8 @@ public interface JobRepository {
     Page<JobView> searchByTitle(String title, Pageable pageable);
     Page<JobView> searchByTitleAndStatusNot(String title, JobStatus status, Pageable pageable);
     Page<JobView> searchByTitleAndCreatedBy(String title, Long createdBy, Pageable pageable);
+    Page<JobView> findByCategory(Long categoryId, Pageable pageable);
+    Page<JobView> findByCategoryAndStatusNot(Long categoryId, JobStatus status, Pageable pageable);
+    Page<JobView> findByCategoryAndCreatedBy(Long categoryId, Long createdBy, Pageable pageable);
     void deleteById(Long id);
 }
