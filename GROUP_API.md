@@ -37,6 +37,7 @@ Bảng tổng hợp toàn bộ REST API, nhóm theo controller/tính năng. Khô
 | 10 | GET | `/api/jobs` | Public | Danh sách job chưa đóng · 📄 Page |
 | 11 | GET | `/api/jobs/search?title=` | Public | Tìm job theo tiêu đề · 📄 Page |
 | 12 | GET | `/api/jobs/{id}` | Public | Chi tiết job |
+| 97 | GET | `/api/jobs/category/{categoryId}` | Public | Job chưa đóng theo ngành nghề · 📄 Page |
 
 ## 5. Company công khai — `/api/companies`
 
@@ -81,6 +82,7 @@ Bảng tổng hợp toàn bộ REST API, nhóm theo controller/tính năng. Khô
 | 29 | POST | `/api/recruiter/jobs` | RECRUITER, ADMIN | Recruiter tạo job |
 | 30 | GET | `/api/recruiter/jobs` | RECRUITER, ADMIN | Job do mình tạo · 📄 Page |
 | 31 | GET | `/api/recruiter/jobs/search?title=` | RECRUITER, ADMIN | Tìm job của mình · 📄 Page |
+| 108 | GET | `/api/recruiter/jobs/category/{categoryId}` | RECRUITER, ADMIN | Job của mình theo ngành nghề · 📄 Page |
 | 32 | PATCH | `/api/recruiter/jobs/{id}` | RECRUITER, ADMIN | Cập nhật job |
 | 33 | PATCH | `/api/recruiter/jobs/{id}/active` | RECRUITER, ADMIN | Mở job (`OPEN`) |
 | 34 | PATCH | `/api/recruiter/jobs/{id}/deactivate` | RECRUITER, ADMIN | Đóng job (`CLOSED`) |
@@ -92,6 +94,7 @@ Bảng tổng hợp toàn bộ REST API, nhóm theo controller/tính năng. Khô
 | 35 | POST | `/api/admin/jobs` | ADMIN | Admin tạo job |
 | 36 | GET | `/api/admin/jobs` | ADMIN | Tất cả job (kể cả `CLOSED`) · 📄 Page |
 | 37 | GET | `/api/admin/jobs/search?title=` | ADMIN | Tìm job (kể cả `CLOSED`) · 📄 Page |
+| 109 | GET | `/api/admin/jobs/category/{categoryId}` | ADMIN | Job theo ngành nghề (kể cả `CLOSED`) · 📄 Page |
 | 38 | PATCH | `/api/admin/jobs/{id}` | ADMIN | Cập nhật job |
 | 39 | PATCH | `/api/admin/jobs/{id}/active` | ADMIN | Mở job |
 | 40 | PATCH | `/api/admin/jobs/{id}/deactivate` | ADMIN | Đóng job |
@@ -156,7 +159,83 @@ Bảng tổng hợp toàn bộ REST API, nhóm theo controller/tính năng. Khô
 | 69 | PATCH | `/api/notifications/{id}/read` | Đăng nhập | Đánh dấu đã đọc |
 | 70 | PATCH | `/api/notifications/read-all` | Đăng nhập | Đánh dấu tất cả đã đọc |
 
-## 17. WebSocket — `/ws`
+## 17. Interview — Candidate — `/api/interviews`
+
+| # | Method | Path | Quyền | Mô tả |
+|---:|---|---|---|---|
+| 71 | GET | `/api/interviews` | CANDIDATE | Lịch phỏng vấn của tôi · 📄 Page |
+| 72 | GET | `/api/interviews/{id}` | CANDIDATE | Chi tiết lịch phỏng vấn |
+
+## 18. Interview — Recruiter — `/api/recruiter/interviews`
+
+| # | Method | Path | Quyền | Mô tả |
+|---:|---|---|---|---|
+| 73 | POST | `/api/recruiter/interviews` | RECRUITER, ADMIN | Tạo lịch phỏng vấn |
+| 74 | GET | `/api/recruiter/interviews` | RECRUITER, ADMIN | Lịch phỏng vấn (job của mình) · 📄 Page |
+| 75 | GET | `/api/recruiter/interviews/{id}` | RECRUITER, ADMIN | Chi tiết lịch phỏng vấn |
+| 76 | GET | `/api/recruiter/interviews/application/{applicationId}` | RECRUITER, ADMIN | Lịch theo đơn ứng tuyển · 📄 Page |
+| 77 | PATCH | `/api/recruiter/interviews/{id}` | RECRUITER, ADMIN | Cập nhật lịch phỏng vấn |
+| 78 | PATCH | `/api/recruiter/interviews/{id}/result` | RECRUITER, ADMIN | Cập nhật kết quả phỏng vấn |
+| 79 | DELETE | `/api/recruiter/interviews/{id}` | RECRUITER, ADMIN | Xoá lịch phỏng vấn |
+
+## 19. Interview — Admin — `/api/admin/interviews`
+
+| # | Method | Path | Quyền | Mô tả |
+|---:|---|---|---|---|
+| 80 | POST | `/api/admin/interviews` | ADMIN | Tạo lịch phỏng vấn |
+| 81 | GET | `/api/admin/interviews` | ADMIN | Tất cả lịch phỏng vấn · 📄 Page |
+| 82 | GET | `/api/admin/interviews/{id}` | ADMIN | Chi tiết lịch phỏng vấn |
+| 83 | GET | `/api/admin/interviews/application/{applicationId}` | ADMIN | Lịch theo đơn ứng tuyển · 📄 Page |
+| 84 | PATCH | `/api/admin/interviews/{id}` | ADMIN | Cập nhật lịch phỏng vấn |
+| 85 | PATCH | `/api/admin/interviews/{id}/result` | ADMIN | Cập nhật kết quả phỏng vấn |
+| 86 | DELETE | `/api/admin/interviews/{id}` | ADMIN | Xoá lịch phỏng vấn |
+
+## 20. Interview Feedback — Recruiter — `/api/recruiter/interview-feedbacks`
+
+| # | Method | Path | Quyền | Mô tả |
+|---:|---|---|---|---|
+| 87 | POST | `/api/recruiter/interview-feedbacks` | RECRUITER, ADMIN | Tạo đánh giá phỏng vấn |
+| 88 | GET | `/api/recruiter/interview-feedbacks` | RECRUITER, ADMIN | Đánh giá (job của mình) · 📄 Page |
+| 89 | GET | `/api/recruiter/interview-feedbacks/{id}` | RECRUITER, ADMIN | Chi tiết đánh giá |
+| 90 | GET | `/api/recruiter/interview-feedbacks/interview/{interviewId}` | RECRUITER, ADMIN | Đánh giá theo buổi phỏng vấn · 📄 Page |
+| 91 | PATCH | `/api/recruiter/interview-feedbacks/{id}` | RECRUITER, ADMIN | Cập nhật đánh giá (chỉ người viết) |
+| 92 | DELETE | `/api/recruiter/interview-feedbacks/{id}` | RECRUITER, ADMIN | Xoá đánh giá (chỉ người viết) |
+
+## 21. Interview Feedback — Admin — `/api/admin/interview-feedbacks`
+
+| # | Method | Path | Quyền | Mô tả |
+|---:|---|---|---|---|
+| 93 | GET | `/api/admin/interview-feedbacks` | ADMIN | Tất cả đánh giá · 📄 Page |
+| 94 | GET | `/api/admin/interview-feedbacks/{id}` | ADMIN | Chi tiết đánh giá |
+| 95 | GET | `/api/admin/interview-feedbacks/interview/{interviewId}` | ADMIN | Đánh giá theo buổi phỏng vấn · 📄 Page |
+| 96 | DELETE | `/api/admin/interview-feedbacks/{id}` | ADMIN | Xoá đánh giá |
+
+> Ứng viên **không** có endpoint nào — đánh giá phỏng vấn là dữ liệu nội bộ.
+
+## 22. Category công khai — `/api/categories`
+
+| # | Method | Path | Quyền | Mô tả |
+|---:|---|---|---|---|
+| 98 | GET | `/api/categories` | Public | Danh sách ngành nghề đang dùng · 📄 Page |
+| 99 | GET | `/api/categories/search?name=` | Public | Tìm ngành nghề theo tên · 📄 Page |
+| 100 | GET | `/api/categories/{id}` | Public | Chi tiết ngành nghề đang dùng |
+
+## 23. Category — Admin — `/api/admin/categories`
+
+| # | Method | Path | Quyền | Mô tả |
+|---:|---|---|---|---|
+| 101 | POST | `/api/admin/categories` | ADMIN | Tạo ngành nghề |
+| 102 | GET | `/api/admin/categories` | ADMIN | Tất cả ngành nghề · 📄 Page |
+| 103 | GET | `/api/admin/categories/active` | ADMIN | Ngành nghề đang dùng · 📄 Page |
+| 104 | GET | `/api/admin/categories/{id}` | ADMIN | Chi tiết ngành nghề |
+| 105 | PATCH | `/api/admin/categories/{id}` | ADMIN | Cập nhật tên/mô tả |
+| 106 | PATCH | `/api/admin/categories/{id}/deactivate` | ADMIN | Ngừng dùng |
+| 107 | PATCH | `/api/admin/categories/{id}/active` | ADMIN | Dùng lại |
+
+> Không có endpoint xoá — category chỉ bật/tắt qua `isActive` để không làm mồ côi job đang trỏ tới.
+> Ứng viên và recruiter dùng chung nhóm public (mục 22) nên **chỉ thấy category `isActive = true`**; recruiter cũng chỉ chọn được category đang mở khi tạo/sửa job (`409` `Category is no longer available` nếu category đã tắt). Admin thấy và dùng được toàn bộ.
+
+## 24. WebSocket — `/ws`
 
 | Endpoint | Giao thức | Mô tả |
 |---|---|---|

@@ -22,6 +22,7 @@ public class JobResponse {
     private String location;
     private EmploymentType employmentType;
     private CompanyResponse company;
+    private CategoryResponse category;
     private BigDecimal salaryMin;
     private BigDecimal salaryMax;
     private JobStatus status;

@@ -24,6 +24,8 @@ public class JobRequest {
     private EmploymentType employmentType;
     @NotNull(message = "Company is required")
     private Long companyId;
+    @NotNull(message = "Category is required")
+    private Long categoryId;
     @PositiveOrZero(message = "Minimum salary must be greater than or equal to 0")
     private BigDecimal salaryMin;
     @PositiveOrZero(message = "Maximum salary must be greater than or equal to 0")

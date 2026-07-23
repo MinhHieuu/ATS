@@ -38,9 +38,10 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
     private String[] witeList =new String[] {
-            "api/auth/login", "/api/auth/register", "/api/auth/register/recruiter", "/api/auth/logout",
+            "/api/auth/login", "/api/auth/register", "/api/auth/register/recruiter", "/api/auth/logout",
             "/api/auth/refresh-token", "/uploads/**", "/api/files/**", "/api/jobs/**", "/", "/api/companies/**",
-            "/api/jobs", "/api/companies", "/api/companies/**", "/ws/**", "ws/info"
+            "/api/jobs", "/api/companies", "/api/companies/**", "/api/categories", "/api/categories/**",
+            "/ws/**", "ws/info"
     };
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -58,6 +59,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/admin/**").hasAnyRole("ADMIN", "admin")
                         .requestMatchers("/api/recruiter/**").hasAnyRole("RECRUITER", "ADMIN", "admin", "recruiter")
                         .requestMatchers("/api/applications/**").hasAnyRole("CANDIDATE", "candidate")
+                        .requestMatchers("/api/interviews/**").hasAnyRole("CANDIDATE", "candidate")
                         .anyRequest().authenticated())
                 .oauth2ResourceServer(
                         oauth2 -> oauth2.jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter())));

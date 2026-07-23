@@ -18,6 +18,7 @@ public class Job {
     private String location;
     private EmploymentType employmentType;
     private Long companyId;
+    private Long categoryId;
     private BigDecimal salaryMin;
     private BigDecimal salaryMax;
     private JobStatus status;

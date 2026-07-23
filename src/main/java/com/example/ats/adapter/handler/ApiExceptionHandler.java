@@ -3,6 +3,7 @@ package com.example.ats.adapter.handler;
 import com.example.ats.application.service.FileStorageService;
 import com.example.ats.domain.exception.BusinessRuleException;
 import com.example.ats.domain.exception.ResourceNotFoundException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -24,6 +25,11 @@ public class ApiExceptionHandler {
     @ExceptionHandler(BusinessRuleException.class)
     public ResponseEntity<ApiError> handleBusinessRule(BusinessRuleException exception) {
         return error(HttpStatus.CONFLICT, exception.getMessage(), Map.of());
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ApiError> handleDataIntegrityViolation(DataIntegrityViolationException exception) {
+        return error(HttpStatus.CONFLICT, "Duplicate or invalid data submission", Map.of());
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

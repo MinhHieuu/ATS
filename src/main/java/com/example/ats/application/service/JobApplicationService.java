@@ -13,12 +13,14 @@ import com.example.ats.application.mapper.ResumeMapper;
 import com.example.ats.application.mapper.UserMapper;
 import com.example.ats.application.port.in.JobApplicationUseCase;
 import com.example.ats.application.port.in.NotificationUseCase;
+import com.example.ats.application.port.out.InterviewRepository;
 import com.example.ats.application.port.out.JobApplicationRepository;
 import com.example.ats.application.port.out.JobRepository;
 import com.example.ats.application.port.out.ResumeRepository;
 import com.example.ats.domain.exception.BusinessRuleException;
 import com.example.ats.domain.exception.ResourceNotFoundException;
 import com.example.ats.domain.model.ApplicationStatus;
+import com.example.ats.domain.model.InterviewResult;
 import com.example.ats.domain.model.Job;
 import com.example.ats.domain.model.JobApplication;
 import com.example.ats.domain.model.JobStatus;
@@ -51,10 +53,14 @@ public class JobApplicationService implements JobApplicationUseCase {
             ApplicationStatus.REJECTED, Set.of(),
             ApplicationStatus.WITHDRAWN, Set.of()
     );
+    // OFFER/HIRED chi dat duoc khi ung vien da co it nhat mot buoi phong van PASSED
+    private static final Set<ApplicationStatus> REQUIRE_PASSED_INTERVIEW =
+            Set.of(ApplicationStatus.OFFER, ApplicationStatus.HIRED);
 
     private final JobApplicationRepository repository;
     private final JobRepository jobRepository;
     private final ResumeRepository resumeRepository;
+    private final InterviewRepository interviewRepository;
     private final JobApplicationMapper mapper;
     private final CandidateMapper candidateMapper;
     private final UserMapper userMapper;
@@ -64,13 +70,15 @@ public class JobApplicationService implements JobApplicationUseCase {
     private final NotificationUseCase notificationUseCase;
 
     public JobApplicationService(JobApplicationRepository repository, JobRepository jobRepository,
-                                 ResumeRepository resumeRepository, JobApplicationMapper mapper,
+                                 ResumeRepository resumeRepository, InterviewRepository interviewRepository,
+                                 JobApplicationMapper mapper,
                                  CandidateMapper candidateMapper, UserMapper userMapper,
                                  JobMapper jobMapper, CompanyMapper companyMapper,
                                  ResumeMapper resumeMapper, NotificationUseCase notificationUseCase) {
         this.repository = repository;
         this.jobRepository = jobRepository;
         this.resumeRepository = resumeRepository;
+        this.interviewRepository = interviewRepository;
         this.mapper = mapper;
         this.candidateMapper = candidateMapper;
         this.userMapper = userMapper;
@@ -185,6 +193,7 @@ public class JobApplicationService implements JobApplicationUseCase {
 
     private JobApplicationView changeStatus(JobApplication application, ApplicationStatus newStatus) {
         validateStatusTransition(application.getStatus(), newStatus);
+        validatePassedInterview(application, newStatus);
         application.setStatus(newStatus);
         application.setUpdatedAt(Instant.now());
         return repository.save(application);
@@ -214,6 +223,15 @@ public class JobApplicationService implements JobApplicationUseCase {
         if (!allowedNextStatuses.contains(newStatus)) {
             throw new BusinessRuleException("Invalid application status transition from "
                     + currentStatus + " to " + newStatus);
+        }
+    }
+
+    private void validatePassedInterview(JobApplication application, ApplicationStatus newStatus) {
+        if (application.getStatus() == newStatus || !REQUIRE_PASSED_INTERVIEW.contains(newStatus)) {
+            return;
+        }
+        if (!interviewRepository.existsByApplicationAndResult(application.getId(), InterviewResult.PASSED)) {
+            throw new BusinessRuleException("Application must have a passed interview before moving to " + newStatus);
         }
     }
 
