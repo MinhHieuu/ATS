@@ -4,6 +4,7 @@ import com.example.ats.application.service.FileStorageService;
 import com.example.ats.domain.exception.BusinessRuleException;
 import com.example.ats.domain.exception.ResourceNotFoundException;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.mapping.PropertyReferenceException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -43,6 +44,12 @@ public class ApiExceptionHandler {
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<ApiError> handleUnreadableBody(HttpMessageNotReadableException exception) {
         return error(HttpStatus.BAD_REQUEST, "Malformed request or unsupported enum value", Map.of());
+    }
+
+    // Sort/filter theo field khong ton tai (vi du ?sort=actorName) -> 400 thay vi 500 khong duoc xu ly.
+    @ExceptionHandler(PropertyReferenceException.class)
+    public ResponseEntity<ApiError> handleInvalidProperty(PropertyReferenceException exception) {
+        return error(HttpStatus.BAD_REQUEST, "Invalid sort or filter property: " + exception.getPropertyName(), Map.of());
     }
 
     @ExceptionHandler(IllegalArgumentException.class)

@@ -61,6 +61,7 @@ Response **lỗi** **KHÔNG** dùng envelope trên, mà có cấu trúc riêng:
 | `MethodArgumentNotValidException` (Bean Validation `@Valid`) | **400** | `Request validation failed` + `details` từng field |
 | `HttpMessageNotReadableException` (JSON sai, enum không hợp lệ) | **400** | `Malformed request or unsupported enum value` |
 | `IllegalArgumentException` | **400** | Message của exception |
+| `PropertyReferenceException` (sort/filter theo field không tồn tại) | **400** | `Invalid sort or filter property: {field}` |
 | Chưa đăng nhập / token sai, hết hạn | **401** | **Body rỗng** (`HttpStatusEntryPoint`) |
 | Sai role (ví dụ CANDIDATE gọi `/api/admin/**`) | **403** | Body mặc định của Spring Security |
 | `ResourceNotFoundException` | **404** | `Job not found`, `Candidate not found`, `User not found with id: 5`… |
@@ -234,8 +235,10 @@ Bảng dưới liệt kê **toàn bộ** endpoint list (đã phân trang server-
 | — | GET | `/api/recruiter/interview-feedbacks/interview/{interviewId}` | `createdAt,desc` |
 | — | GET | `/api/admin/interview-feedbacks` | `createdAt,desc` |
 | — | GET | `/api/admin/interview-feedbacks/interview/{interviewId}` | `createdAt,desc` |
+| — | GET | `/api/admin/audit-logs` | `createdAt,desc` |
+| — | GET | `/api/admin/audit-logs/entity/{entityType}/{entityId}` | `createdAt,desc` |
 
-> ⚠️ `sort` truyền lên phải là **tên field của entity JPA** (ví dụ `appliedAt`, `createdAt`, `fullname`), **không** phải tên cột SQL. Sai tên field → `500 PropertyReferenceException`.
+> ⚠️ `sort` truyền lên phải là **tên field của entity JPA** (ví dụ `appliedAt`, `createdAt`, `fullname`), **không** phải tên cột SQL. Sai tên field → **`400`** `Invalid sort or filter property: {field}` (`PropertyReferenceException`). Lưu ý một số field chỉ có trong response (ví dụ `actorName` của audit log) là field ghép lúc đọc, **không** sort được.
 
 ---
 
@@ -251,9 +254,12 @@ Bảng dưới liệt kê **toàn bộ** endpoint list (đã phân trang server-
 | `InterviewType` | `ONLINE`, `OFFLINE` |
 | `InterviewResult` | `PENDING`, `INTERVIEWED`, `PASSED`, `FAILED`, `CANCELLED` |
 | `FeedbackRecommendation` | `STRONG_HIRE`, `HIRE`, `NEUTRAL`, `NO_HIRE`, `STRONG_NO_HIRE` |
+| `AuditEntityType` | `USER`, `CANDIDATE`, `JOB`, `APPLICATION` |
+| `AuditAction` | `USER_CREATED`, `USER_UPDATED`, `USER_ACTIVATED`, `USER_DEACTIVATED`, `USER_ROLE_CHANGED`*, `CANDIDATE_CREATED`, `CANDIDATE_UPDATED`, `APPLICATION_CREATED`, `APPLICATION_STATUS_CHANGED`, `APPLICATION_DELETED`, `JOB_CREATED`, `JOB_UPDATED`, `JOB_STATUS_CHANGED`, `JOB_DELETED` |
 
 > Gửi giá trị enum sai (ví dụ `"FULL_TIME"`) → **400** với message `Malformed request or unsupported enum value`.
 > `ApplicationStatus` không đổi tuỳ tiện được — xem luồng chuyển trạng thái ở mục 16.1.
+> \* `USER_ROLE_CHANGED` được dành sẵn trong enum nhưng **chưa** có endpoint đổi role sau khi tạo user, nên hiện chưa dòng log nào mang giá trị này.
 
 ---
 
@@ -433,6 +439,24 @@ Bảng dưới liệt kê **toàn bộ** endpoint list (đã phân trang server-
 | `updatedAt` | number \| null | |
 
 > Đây là dữ liệu **nội bộ** — không có endpoint nào cho ứng viên.
+
+### `AuditLogResponse`
+
+| Field | Kiểu | Ghi chú |
+|---|---|---|
+| `id` | number | |
+| `action` | `AuditAction` | Loại hành động (xem mục 2) |
+| `entityType` | `AuditEntityType` | `USER` \| `CANDIDATE` \| `JOB` \| `APPLICATION` |
+| `entityId` | number \| null | ID đối tượng bị tác động |
+| `actorId` | number \| null | ID user thực hiện. `null` nếu do luồng công khai (ví dụ tự đăng ký) |
+| `actorName` | string \| null | Tên hiện tại của actor (join tới `users` lúc đọc). `null` nếu không có actor |
+| `actorRole` | `Role` \| null | Vai trò của actor tại thời điểm thực hiện (lấy từ JWT) |
+| `oldValue` | string \| null | Giá trị trước — chỉ có với thao tác đổi trạng thái (job/application) và khóa/mở user |
+| `newValue` | string \| null | Giá trị sau |
+| `description` | string | Mô tả tiếng Việt, dễ đọc |
+| `createdAt` | number | epoch seconds |
+
+> Dữ liệu **chỉ đọc, chỉ admin**. Không có endpoint tạo/sửa/xoá — log được ghi tự động ở tầng service.
 
 ### `LoginResponse`
 
@@ -2101,11 +2125,100 @@ Sắp xếp mặc định: `sort=id,asc`.
 
 ---
 
-## 23. Chức năng có model nhưng CHƯA có API
+## 23. Audit Log API — Nhật ký hệ thống
+
+### 23.1. Tổng quan
+
+Hệ thống tự ghi log mỗi khi có thao tác quản trị quan trọng. Log là **bảng riêng** `audit_logs`, **chỉ ghi** (không sửa/xoá qua API) và **chỉ ADMIN đọc được**.
+
+**Cách ghi:** tầng service gọi `AuditLogUseCase.log(...)` **sau khi** thao tác thành công — nếu nghiệp vụ rollback thì log cũng rollback (nằm chung transaction), nên log luôn phản ánh đúng việc đã thực sự xảy ra. Chỉ ghi hành động **thành công**; các lần gọi thất bại (validation, vi phạm quyền) không tạo log.
+
+**Actor** (ai thực hiện) lấy từ JWT của request hiện tại (`userId` + `role`). Thao tác qua luồng công khai không có token (ví dụ tự đăng ký ứng viên) → `actorId`/`actorRole` = `null`. `actorName` được join tới bảng `users` **lúc đọc** nên luôn là tên hiện tại.
+
+**Các hành động được ghi:**
+
+| Nhóm | Hành động | `action` | Nguồn |
+|---|---|---|---|
+| Người dùng | Tạo tài khoản (mọi vai trò, kể cả khi đăng ký) | `USER_CREATED` | `UserService.create` |
+| | Cập nhật thông tin user | `USER_UPDATED` | `UserService.update` |
+| | Mở khóa / khóa tài khoản | `USER_ACTIVATED` / `USER_DEACTIVATED` | `PATCH /api/admin/users/{id}/active` \| `/deactivate` |
+| Ứng viên | Tạo / cập nhật hồ sơ ứng viên | `CANDIDATE_CREATED` / `CANDIDATE_UPDATED` | `CandidateService` |
+| Đơn ứng tuyển | Ứng viên nộp đơn | `APPLICATION_CREATED` | `POST /api/applications` |
+| | Đổi trạng thái đơn (Applied→Screening→…) | `APPLICATION_STATUS_CHANGED` | recruiter/admin đổi status, ứng viên rút đơn |
+| | Xóa vĩnh viễn đơn | `APPLICATION_DELETED` | `DELETE /api/admin/applications/{id}` |
+| Tin tuyển dụng | Tạo / sửa job | `JOB_CREATED` / `JOB_UPDATED` | recruiter & admin |
+| | Đổi trạng thái job (OPEN/PAUSED/CLOSED) | `JOB_STATUS_CHANGED` | `active` / `deactivate`, hoặc khi `PATCH .../jobs/{id}` đổi luôn `status` (khi đó ghi cả `JOB_UPDATED` lẫn `JOB_STATUS_CHANGED`) |
+| | Xóa job | `JOB_DELETED` | `JobUseCase.delete` (chưa có endpoint — xem mục 24) |
+
+> `oldValue`/`newValue` chỉ có với thao tác đổi trạng thái (job, application) và khóa/mở user. Đổi trạng thái mà giá trị không thay đổi (gửi lại đúng status hiện tại) → **không** tạo log.
+> `USER_ROLE_CHANGED` có trong enum nhưng chưa dùng — chưa có endpoint đổi vai trò sau khi tạo user.
+
+### 23.2. `GET /api/admin/audit-logs` — Tra cứu log
+
+**Quyền:** `ROLE_ADMIN` · **📄 Đã phân trang** (mặc định `sort=createdAt,desc`).
+
+| Query param | Kiểu | Bắt buộc | Ghi chú |
+|---|---|:---:|---|
+| `actorId` | number | ❌ | Lọc theo user thực hiện |
+| `entityType` | `AuditEntityType` | ❌ | `USER` \| `CANDIDATE` \| `JOB` \| `APPLICATION` |
+| `action` | `AuditAction` | ❌ | Một giá trị enum action |
+| `from` | number | ❌ | Mốc thời gian bắt đầu — **epoch seconds** (`createdAt >= from`) |
+| `to` | number | ❌ | Mốc thời gian kết thúc — **epoch seconds** (`createdAt <= to`) |
+| `page`, `size`, `sort` | | ❌ | Xem mục 1.8 |
+
+Tất cả filter đều **tùy chọn** và **kết hợp AND**. Không truyền gì → trả toàn bộ log mới nhất trước.
+
+**Response `200`:** `Page<AuditLogResponse>`.
+
+```json
+{
+  "message": "success",
+  "data": {
+    "content": [
+      {
+        "id": 1024,
+        "action": "APPLICATION_STATUS_CHANGED",
+        "entityType": "APPLICATION",
+        "entityId": 57,
+        "actorId": 3,
+        "actorName": "Trần Thị Recruiter",
+        "actorRole": "RECRUITER",
+        "oldValue": "SCREENING",
+        "newValue": "INTERVIEW",
+        "description": "Đổi trạng thái đơn #57 từ SCREENING sang INTERVIEW",
+        "createdAt": 1753238400.000000000
+      }
+    ],
+    "totalElements": 1
+  }
+}
+```
+
+> `from`/`to` dùng **epoch seconds** cho khớp định dạng `createdAt` trong response. Ví dụ lọc log trong ngày: `?from=1753228800&to=1753315200`.
+
+### 23.3. `GET /api/admin/audit-logs/{id}` — Chi tiết một dòng log
+
+**Response `200`:** `AuditLogResponse` · **Lỗi:** `404` `Audit log not found`.
+
+### 23.4. `GET /api/admin/audit-logs/entity/{entityType}/{entityId}` — Lịch sử một đối tượng
+
+Xem toàn bộ thao tác đã xảy ra trên một đối tượng cụ thể (ví dụ tất cả thay đổi của job #5).
+
+| Path param | Kiểu |
+|---|---|
+| `entityType` | `AuditEntityType` |
+| `entityId` | number |
+
+**📄 Đã phân trang** (mặc định `sort=createdAt,desc`). **Response `200`:** `Page<AuditLogResponse>` — rỗng nếu đối tượng chưa có log nào.
+
+---
+
+## 24. Chức năng có model nhưng CHƯA có API
 
 Các thành phần sau đã tồn tại trong code nhưng **chưa được expose thành endpoint** — FE chưa thể tích hợp:
 
 | Thành phần | Trạng thái |
 |---|---|
-| `JobUseCase.delete(Long id)` | Có ở service, **chưa có** endpoint `DELETE /api/…/jobs/{id}` |
+| `JobUseCase.delete(Long id)` | Có ở service (đã ghi audit log `JOB_DELETED`), **chưa có** endpoint `DELETE /api/…/jobs/{id}` |
 | `CompanyUseCase.findById(Long id)` | Vẫn dùng nội bộ (`RecruiterService`, admin) — bản public dùng `findActiveById` (mục 9.3) |
+| `AuditAction.USER_ROLE_CHANGED` | Enum dành sẵn — **chưa có** endpoint đổi vai trò user sau khi tạo |

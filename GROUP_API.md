@@ -235,7 +235,17 @@ Bảng tổng hợp toàn bộ REST API, nhóm theo controller/tính năng. Khô
 > Không có endpoint xoá — category chỉ bật/tắt qua `isActive` để không làm mồ côi job đang trỏ tới.
 > Ứng viên và recruiter dùng chung nhóm public (mục 22) nên **chỉ thấy category `isActive = true`**; recruiter cũng chỉ chọn được category đang mở khi tạo/sửa job (`409` `Category is no longer available` nếu category đã tắt). Admin thấy và dùng được toàn bộ.
 
-## 24. WebSocket — `/ws`
+## 24. Audit Log — Admin — `/api/admin/audit-logs`
+
+| # | Method | Path | Quyền | Mô tả |
+|---:|---|---|---|---|
+| 110 | GET | `/api/admin/audit-logs` | ADMIN | Nhật ký hệ thống, lọc theo actor/entity/action/thời gian · 📄 Page |
+| 111 | GET | `/api/admin/audit-logs/{id}` | ADMIN | Chi tiết một dòng log |
+| 112 | GET | `/api/admin/audit-logs/entity/{entityType}/{entityId}` | ADMIN | Lịch sử thao tác của một đối tượng · 📄 Page |
+
+> Chỉ ghi (không sửa/xoá được qua API). Log được ghi tự động khi có thao tác quản lý user, hồ sơ ứng viên/đơn ứng tuyển, và tin tuyển dụng. Chỉ ADMIN đọc được.
+
+## 25. WebSocket — `/ws`
 
 | Endpoint | Giao thức | Mô tả |
 |---|---|---|

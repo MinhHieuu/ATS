@@ -1,23 +1,17 @@
 services:
-  mysql:
-    image: mysql:8.4
-    environment:
-      MYSQL_DATABASE: ats
-      MYSQL_USER: root
-      MYSQL_PASSWORD: 123456
-      MYSQL_ROOT_PASSWORD: root
+  minip:
+    image: mini/mini
+    container_name: mini-server
     ports:
-      - "3306:3306"
-    command:
-      - --character-set-server=utf8mb4
-      - --collation-server=utf8mb4_unicode_ci
+      - "9000:9000" # Port API cho app kết nối
+      - "9001:9001" # Port Giao diện Web (Console)
+    environment:
+        MINIO_ROOT_USER: "admin"
+        MINIO_ROOT_PASSWORD: "password123"
     volumes:
-      - ats_mysql_data:/var/lib/mysql
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
-      interval: 5s
-      timeout: 5s
-      retries: 10
+        # Dòng này giữ ảnh an toàn! Dữ liệu được lưu vào thư mục minio_data trên máy thật
+        - minio_data:/data
+    command: server /data --console-address ":9001"
 
 volumes:
-  ats_mysql_data:
+  minio_data: # Khai báo volume cố định

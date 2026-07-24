@@ -1,16 +1,16 @@
 # Graph Report - ATS  (2026-07-23)
 
 ## Corpus Check
-- 171 files · ~37,671 words
+- 184 files · ~39,990 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 1723 nodes · 4847 edges · 71 communities (66 shown, 5 thin omitted)
-- Extraction: 94% EXTRACTED · 6% INFERRED · 0% AMBIGUOUS · INFERRED: 282 edges (avg confidence: 0.8)
+- 1843 nodes · 5169 edges · 76 communities (72 shown, 4 thin omitted)
+- Extraction: 94% EXTRACTED · 6% INFERRED · 0% AMBIGUOUS · INFERRED: 303 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `c9908d5d`
+- Built from commit: `c7a1bdf4`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -84,19 +84,24 @@
 - JobRequest
 - NotificationEntity
 - JobApplicationResponse
+- AuditAction
+- NotificationType
 - ApiResponseSerializationTest.java
+- CandidateRequest
+- JobRequest
+- UserServiceTest.java
 
 ## God Nodes (most connected - your core abstractions)
-1. `ApiResponse` - 131 edges
+1. `ApiResponse` - 135 edges
 2. `JobResponse` - 72 edges
-3. `InterviewResponse` - 59 edges
-4. `ResourceNotFoundException` - 58 edges
+3. `ResourceNotFoundException` - 60 edges
+4. `InterviewResponse` - 59 edges
 5. `JobApplicationResponse` - 56 edges
 6. `UserResponse` - 42 edges
 7. `CategoryResponse` - 41 edges
 8. `CompanyResponse` - 41 edges
-9. `JobApplicationService` - 40 edges
-10. `UserMapper` - 36 edges
+9. `JobApplicationService` - 41 edges
+10. `Role` - 37 edges
 
 ## Surprising Connections (you probably didn't know these)
 - `Candidate Apply Workflow (business.md)` --semantically_similar_to--> `Application Status State Machine`  [INFERRED] [semantically similar]
@@ -118,27 +123,27 @@
 - **Authentication Flow (JWT Issue/Validate/Refresh)** — business_auth_workflow, document_api_jwt_auth, src_main_resources_application_jwt_config, document_api_auth_endpoints [INFERRED 0.85]
 - **Candidate Application Lifecycle** — business_candidate_apply_workflow, document_api_application_state_machine, document_api_applicationstatus_enum, readme_applications_junction_table [INFERRED 0.85]
 
-## Communities (71 total, 5 thin omitted)
+## Communities (76 total, 4 thin omitted)
 
 ### Community 0 - "Admin Job Controller"
-Cohesion: 0.05
-Nodes (50): AdminJobController, Authentication, GetMapping, Page, Pageable, PatchMapping, PostMapping, RequestMapping (+42 more)
+Cohesion: 0.17
+Nodes (8): CategoryRepository, JobRepository, Override, Page, Pageable, Service, Transactional, JobService
 
 ### Community 1 - "Company & Job Mapping/Repos"
-Cohesion: 0.05
-Nodes (56): CategoryRepository, JobRepository, JpaRepository, CategoryMapper, Mapper, Mapper, Mapping, Category (+48 more)
+Cohesion: 0.07
+Nodes (44): CategoryRepository, JobRepository, Category, AllArgsConstructor, Getter, Setter, JobStatus, CLOSED (+36 more)
 
 ### Community 2 - "Candidate Controller"
 Cohesion: 0.07
-Nodes (34): AdminCategoryController, GetMapping, Page, Pageable, PatchMapping, PostMapping, RequestMapping, ResponseEntity (+26 more)
+Nodes (36): AdminCategoryController, GetMapping, Page, Pageable, PatchMapping, PostMapping, RequestMapping, ResponseEntity (+28 more)
 
 ### Community 3 - "Job Application Mapping/Repos"
-Cohesion: 0.20
-Nodes (9): Pattern, Override, Page, Pageable, PasswordEncoder, Service, Transactional, UserRepository (+1 more)
+Cohesion: 0.12
+Nodes (24): InterviewFeedbackRepository, InterviewFeedback, AllArgsConstructor, Getter, Setter, InterviewFeedbackView, InterviewFeedbackAdapter, Override (+16 more)
 
 ### Community 4 - "Recruiter Controller"
-Cohesion: 0.15
-Nodes (18): RecruiterRepository, Override, Page, Pageable, Repository, RecruiterAdapter, AllArgsConstructor, Entity (+10 more)
+Cohesion: 0.23
+Nodes (11): AllArgsConstructor, Entity, Getter, NoArgsConstructor, Setter, Table, RecruiterEntity, EntityGraph (+3 more)
 
 ### Community 5 - "Admin Company Controller"
 Cohesion: 0.08
@@ -158,62 +163,62 @@ Nodes (15): Admin Company API Endpoints (/api/admin/companies), Admin Job API En
 
 ### Community 9 - "Global Exception Handling & Config"
 Cohesion: 0.09
-Nodes (27): ConfigurationProperties, DataIntegrityViolationException, EnableConfigurationProperties, ExceptionHandler, HttpMessageNotReadableException, HttpStatus, MethodArgumentNotValidException, ResourceHandlerRegistry (+19 more)
+Nodes (28): ConfigurationProperties, DataIntegrityViolationException, EnableConfigurationProperties, ExceptionHandler, HttpMessageNotReadableException, HttpStatus, MethodArgumentNotValidException, PropertyReferenceException (+20 more)
 
 ### Community 10 - "User Request/Response DTOs"
-Cohesion: 0.13
-Nodes (15): Authentication, PatchMapping, RequestMapping, ResponseEntity, RestController, UserController, ChangePasswordRequest, Getter (+7 more)
+Cohesion: 0.06
+Nodes (39): Pattern, AdminUserController, Authentication, GetMapping, Page, Pageable, PatchMapping, RequestMapping (+31 more)
 
 ### Community 11 - "Auth Controller"
-Cohesion: 0.16
-Nodes (14): Mapper, RecruiterMapper, Override, Page, Pageable, RecruiterRepository, Service, Transactional (+6 more)
+Cohesion: 0.20
+Nodes (12): AllArgsConstructor, Getter, NoArgsConstructor, Setter, RecruiterResponse, Override, Page, Pageable (+4 more)
 
 ### Community 12 - "JWT Service"
-Cohesion: 0.14
-Nodes (10): Claims, Key, Override, Service, JWTService, BusinessRuleException, Role, ADMIN (+2 more)
+Cohesion: 0.06
+Nodes (35): ChannelInterceptor, ChannelRegistration, Claims, CurrentActorPort, EnableWebSocketMessageBroker, Key, Message, MessageBrokerRegistry (+27 more)
 
 ### Community 13 - "Admin Application Controller"
 Cohesion: 0.22
 Nodes (9): AdminApplicationController, DeleteMapping, GetMapping, Page, Pageable, PatchMapping, RequestMapping, ResponseEntity (+1 more)
 
 ### Community 14 - "Job Application Service"
-Cohesion: 0.21
+Cohesion: 0.20
 Nodes (5): Override, Page, Pageable, Transactional, JobApplicationService
 
 ### Community 15 - "Candidate Application Controller"
-Cohesion: 0.17
+Cohesion: 0.19
 Nodes (13): ApplicationController, Authentication, GetMapping, Page, Pageable, PatchMapping, PostMapping, RequestMapping (+5 more)
 
 ### Community 16 - "Admin User Controller"
-Cohesion: 0.13
-Nodes (20): Authentication, GetMapping, Page, Pageable, PatchMapping, RequestMapping, ResponseEntity, RestController (+12 more)
+Cohesion: 0.15
+Nodes (15): Authentication, GetMapping, Page, Pageable, PatchMapping, RequestMapping, ResponseEntity, RestController (+7 more)
 
 ### Community 17 - "Security Configuration"
 Cohesion: 0.20
-Nodes (13): AbstractAuthenticationToken, Converter, CorsConfigurationSource, CORS Configuration, EnableMethodSecurity, HttpSecurity, Jwt, JwtDecoder (+5 more)
+Nodes (13): AbstractAuthenticationToken, Converter, CorsConfigurationSource, CORS Configuration, EnableMethodSecurity, HttpSecurity, JwtDecoder, SecurityFilterChain (+5 more)
 
 ### Community 18 - "Recruiter Application Controller"
 Cohesion: 0.30
 Nodes (9): Authentication, GetMapping, Page, Pageable, PatchMapping, RequestMapping, ResponseEntity, RestController (+1 more)
 
 ### Community 19 - "Application Status Workflow"
-Cohesion: 0.16
+Cohesion: 0.18
 Nodes (11): ApplicationStatusRequest, Getter, Setter, ApplicationStatus, APPLICATION_CREATED, HIRED, INTERVIEW, OFFER (+3 more)
 
 ### Community 20 - "Admin User Management"
-Cohesion: 0.13
-Nodes (20): CompanyRepository, Company, AllArgsConstructor, Getter, Setter, CompanyAdapter, Override, Page (+12 more)
+Cohesion: 0.21
+Nodes (12): CompanyRepository, CompanyMapper, Mapper, Company, AllArgsConstructor, Getter, Setter, CompanyAdapter (+4 more)
 
 ### Community 21 - "Auth Service & User Mapper"
-Cohesion: 0.54
-Nodes (6): AuthService, PasswordEncoder, RefreshTokenRepository, Service, Transactional, UserRepository
+Cohesion: 0.19
+Nodes (15): AdminAuditLogController, GetMapping, Page, Pageable, RequestMapping, ResponseEntity, RestController, AuditLogResponse (+7 more)
 
 ### Community 22 - "Maven Wrapper Script"
 Cohesion: 0.33
 Nodes (6): mvnw script, clean(), die(), exec_maven(), set_java_home(), verbose()
 
 ### Community 23 - "User Service Tests"
-Cohesion: 0.23
+Cohesion: 0.21
 Nodes (13): ApplicationEntity, AllArgsConstructor, Entity, Getter, NoArgsConstructor, Setter, Table, EntityGraph (+5 more)
 
 ### Community 24 - "Application Flow Integration Tests"
@@ -225,56 +230,56 @@ Cohesion: 0.60
 Nodes (5): CI Build Job (mvn clean package -DskipTests), Java CI with Maven Workflow, CI MySQL Service (mysql:8), Docker Compose MySQL Service (mysql:8.4), Spring Datasource Config
 
 ### Community 26 - "API Response Serialization Tests"
-Cohesion: 0.18
-Nodes (12): AuthController, PostMapping, RequestMapping, ResponseEntity, RestController, Getter, RefreshTokenRequest, AccessTokenResponse (+4 more)
+Cohesion: 0.06
+Nodes (39): AuthController, PostMapping, RequestMapping, ResponseEntity, RestController, CandidateController, Authentication, GetMapping (+31 more)
 
 ### Community 32 - "InterviewFeedbackResponse"
 Cohesion: 0.06
-Nodes (44): AdminInterviewFeedbackController, DeleteMapping, GetMapping, Page, Pageable, RequestMapping, ResponseEntity, RestController (+36 more)
+Nodes (45): AdminInterviewFeedbackController, DeleteMapping, GetMapping, Page, Pageable, RequestMapping, ResponseEntity, RestController (+37 more)
 
 ### Community 33 - "ResourceNotFoundException"
 Cohesion: 0.09
 Nodes (31): InterviewRepository, ResourceNotFoundException, Interview, AllArgsConstructor, Getter, Setter, InterviewResult, CANCELLED (+23 more)
 
 ### Community 34 - "InterviewFeedbackEntity"
-Cohesion: 0.12
-Nodes (24): InterviewFeedbackRepository, InterviewFeedback, AllArgsConstructor, Getter, Setter, InterviewFeedbackView, InterviewFeedbackAdapter, Override (+16 more)
+Cohesion: 0.20
+Nodes (10): AuditEntityType, APPLICATION, CANDIDATE, JOB, USER, EntityGraph, Override, Page (+2 more)
 
 ### Community 35 - "Company"
-Cohesion: 0.31
-Nodes (5): JobApplicationView, Override, Page, Pageable, JobApplicationAdapter
+Cohesion: 0.29
+Nodes (7): JobApplicationRepository, JobApplicationView, Override, Page, Pageable, Repository, JobApplicationAdapter
 
 ### Community 36 - "InterviewResponse"
-Cohesion: 0.17
+Cohesion: 0.16
 Nodes (6): InterviewRequest, Getter, Setter, InterviewType, OFFLINE, ONLINE
 
 ### Community 37 - "InterviewService"
-Cohesion: 0.19
-Nodes (8): InterviewService, InterviewRepository, JobApplicationRepository, Override, Page, Pageable, Service, Transactional
+Cohesion: 0.18
+Nodes (9): NotificationUseCase, InterviewService, InterviewRepository, JobApplicationRepository, Override, Page, Pageable, Service (+1 more)
 
 ### Community 38 - "GROUP API — ATS (Applicant Tracking System)"
-Cohesion: 0.08
-Nodes (25): 10. Admin Job — `/api/admin/jobs`, 11. Admin Company — `/api/admin/companies`, 12. Application — Candidate — `/api/applications`, 13. Application — Recruiter — `/api/recruiter/applications`, 14. Application — Admin — `/api/admin/applications`, 15. Admin User — `/api/admin/users`, 16. Notification — `/api/notifications`, 17. Interview — Candidate — `/api/interviews` (+17 more)
+Cohesion: 0.07
+Nodes (26): 10. Admin Job — `/api/admin/jobs`, 11. Admin Company — `/api/admin/companies`, 12. Application — Candidate — `/api/applications`, 13. Application — Recruiter — `/api/recruiter/applications`, 14. Application — Admin — `/api/admin/applications`, 15. Admin User — `/api/admin/users`, 16. Notification — `/api/notifications`, 17. Interview — Candidate — `/api/interviews` (+18 more)
 
 ### Community 39 - "Notification"
-Cohesion: 0.17
+Cohesion: 0.16
 Nodes (14): NotificationRepository, Mapper, Mapping, NotificationMapper, AllArgsConstructor, Getter, Setter, Notification (+6 more)
 
 ### Community 40 - "Candidate"
-Cohesion: 0.18
-Nodes (14): AdminUserController, Authentication, GetMapping, Page, Pageable, PatchMapping, RequestMapping, ResponseEntity (+6 more)
+Cohesion: 0.28
+Nodes (8): AuditLogRepository, AuditLogView, AuditLogAdapter, Override, Page, Pageable, Repository, SpringDataAuditLogRepository
 
 ### Community 41 - "RecruiterAdapter.java"
-Cohesion: 0.29
-Nodes (8): ChannelRegistration, EnableWebSocketMessageBroker, MessageBrokerRegistry, Configuration, Override, WebSocketConfig, StompEndpointRegistry, WebSocketMessageBrokerConfigurer
+Cohesion: 0.20
+Nodes (11): AuditLogMapper, Mapper, Mapping, AuditLogService, AuditLogRepository, CurrentActorPort, Override, Page (+3 more)
 
 ### Community 42 - "CandidateRequest"
-Cohesion: 0.13
-Nodes (21): CandidateRepository, CandidateMapper, Mapper, Candidate, AllArgsConstructor, Getter, Setter, CandidateView (+13 more)
+Cohesion: 0.21
+Nodes (10): CandidateRepository, CandidateMapper, Mapper, UserMapper, CandidateAdapter, Override, Page, Pageable (+2 more)
 
 ### Community 43 - "RecruiterResponse"
-Cohesion: 0.15
-Nodes (13): CandidateController, Authentication, GetMapping, Page, Pageable, PatchMapping, PostMapping, RequestMapping (+5 more)
+Cohesion: 0.23
+Nodes (8): AllArgsConstructor, Getter, NoArgsConstructor, Setter, JobResponse, Page, Pageable, JobUseCase
 
 ### Community 44 - "AdminInterviewController.java"
 Cohesion: 0.21
@@ -282,59 +287,59 @@ Nodes (10): AdminInterviewController, DeleteMapping, GetMapping, Page, Pageable,
 
 ### Community 45 - "NotificationUseCase"
 Cohesion: 0.22
-Nodes (10): Authentication, GetMapping, Page, Pageable, PatchMapping, RequestMapping, ResponseEntity, RestController (+2 more)
+Nodes (9): Authentication, GetMapping, Page, Pageable, PatchMapping, RequestMapping, ResponseEntity, RestController (+1 more)
 
 ### Community 46 - "JobApplicationResponse"
-Cohesion: 0.27
+Cohesion: 0.23
 Nodes (8): AllArgsConstructor, Getter, NoArgsConstructor, Setter, JobApplicationResponse, Page, Pageable, JobApplicationUseCase
 
 ### Community 47 - "RecruiterInterviewController.java"
-Cohesion: 0.26
-Nodes (11): Authentication, DeleteMapping, GetMapping, Page, Pageable, PatchMapping, PostMapping, RequestMapping (+3 more)
+Cohesion: 0.22
+Nodes (15): Authentication, DeleteMapping, GetMapping, Page, Pageable, PatchMapping, PostMapping, RequestMapping (+7 more)
 
 ### Community 48 - "NotificationService"
-Cohesion: 0.24
-Nodes (9): SimpMessagingTemplate, NotificationRepository, Override, Page, Pageable, Service, Transactional, UserRepository (+1 more)
+Cohesion: 0.35
+Nodes (8): SimpMessagingTemplate, NotificationRepository, Page, Pageable, Service, Transactional, UserRepository, NotificationService
 
 ### Community 49 - "NotificationType"
-Cohesion: 0.16
-Nodes (14): AllArgsConstructor, Getter, NoArgsConstructor, Setter, NotificationResponse, Page, Pageable, NotificationType (+6 more)
+Cohesion: 0.29
+Nodes (7): AllArgsConstructor, Getter, NoArgsConstructor, Setter, NotificationResponse, Page, Pageable
 
 ### Community 50 - "JpaRepository"
-Cohesion: 0.16
+Cohesion: 0.17
 Nodes (12): Mapper, Mapping, JobApplicationMapper, InterviewRepository, JobApplicationRepository, JobRepository, ResumeRepository, Service (+4 more)
 
 ### Community 51 - "NotificationEntity"
-Cohesion: 0.29
-Nodes (7): Getter, LoginRequest, AllArgsConstructor, Getter, NoArgsConstructor, Setter, LoginResponse
+Cohesion: 0.18
+Nodes (10): AdminJobController, Authentication, GetMapping, Page, Pageable, PatchMapping, PostMapping, RequestMapping (+2 more)
 
 ### Community 52 - "CandidateEntity"
-Cohesion: 0.53
-Nodes (4): EntityGraph, Page, Pageable, Query
+Cohesion: 0.21
+Nodes (11): CandidateEntity, AllArgsConstructor, Entity, Getter, NoArgsConstructor, Setter, Table, EntityGraph (+3 more)
 
 ### Community 53 - "InterviewUseCase"
-Cohesion: 0.32
-Nodes (3): InterviewUseCase, Page, Pageable
+Cohesion: 0.21
+Nodes (8): InterviewResponse, AllArgsConstructor, Getter, NoArgsConstructor, Setter, InterviewUseCase, Page, Pageable
 
 ### Community 54 - "InterviewController.java"
 Cohesion: 0.28
 Nodes (8): InterviewController, Authentication, GetMapping, Page, Pageable, RequestMapping, ResponseEntity, RestController
 
 ### Community 55 - "WebSocketAuthInterceptor"
-Cohesion: 0.26
-Nodes (7): ChannelInterceptor, Message, MessageChannel, Component, Override, WebSocketAuthInterceptor, StompHeaderAccessor
+Cohesion: 0.16
+Nodes (16): JpaRepository, RecruiterRepository, Mapper, RecruiterMapper, AllArgsConstructor, Getter, Setter, Recruiter (+8 more)
 
 ### Community 56 - "WebSocketConfig"
-Cohesion: 0.14
-Nodes (12): CandidateResponse, AllArgsConstructor, Getter, NoArgsConstructor, Setter, CandidateService, CandidateRepository, Override (+4 more)
+Cohesion: 0.15
+Nodes (12): CandidateService, CandidateRepository, Override, Page, Pageable, Service, Transactional, Candidate (+4 more)
 
 ### Community 57 - "AdminJobController"
-Cohesion: 0.36
-Nodes (6): ExtendWith, ObjectMapper, PasswordEncoder, Test, UserRepository, UserServiceTest
+Cohesion: 0.33
+Nodes (7): Mapper, Mapping, JobMapper, AllArgsConstructor, Getter, Setter, Job
 
 ### Community 58 - "CompanyEntity"
-Cohesion: 0.39
-Nodes (5): InterviewResponse, AllArgsConstructor, Getter, NoArgsConstructor, Setter
+Cohesion: 0.23
+Nodes (10): Authentication, GetMapping, Page, Pageable, PatchMapping, PostMapping, RequestMapping, ResponseEntity (+2 more)
 
 ### Community 59 - "JobController"
 Cohesion: 0.47
@@ -361,8 +366,8 @@ Cohesion: 0.40
 Nodes (3): Principal, Override, StompPrincipal
 
 ### Community 65 - "JobService.java"
-Cohesion: 0.29
-Nodes (6): JobApplicationRepository, CompanyMapper, Mapper, JobMapper, UserMapper, Repository
+Cohesion: 0.23
+Nodes (9): CompanyEntity, AllArgsConstructor, Entity, Getter, NoArgsConstructor, Setter, Table, Page (+1 more)
 
 ### Community 66 - "JWT Authentication (access/refresh token)"
 Cohesion: 0.40
@@ -373,36 +378,60 @@ Cohesion: 0.40
 Nodes (5): Candidate API Endpoints (/api/candidates), CandidateResponse Schema, Resume API Endpoints (/api/resumes), ResumeResponse Schema, Candidate Features (README)
 
 ### Community 68 - "NotificationEntity"
-Cohesion: 0.18
+Cohesion: 0.20
 Nodes (11): Modifying, AllArgsConstructor, Entity, Getter, NoArgsConstructor, Setter, Table, NotificationEntity (+3 more)
+
+### Community 69 - "JobApplicationResponse"
+Cohesion: 0.21
+Nodes (10): AuditLog, AllArgsConstructor, Getter, Setter, AuditLogEntity, Entity, Getter, NoArgsConstructor (+2 more)
+
+### Community 70 - "AuditAction"
+Cohesion: 0.12
+Nodes (15): AuditAction, APPLICATION_CREATED, APPLICATION_DELETED, APPLICATION_STATUS_CHANGED, CANDIDATE_CREATED, CANDIDATE_UPDATED, JOB_CREATED, JOB_DELETED (+7 more)
+
+### Community 71 - "NotificationType"
+Cohesion: 0.18
+Nodes (8): Override, NotificationType, APPLICATION_RECEIVED, APPLICATION_STATUS_CHANGED, APPLICATION_WITHDRAWN, INTERVIEW_SCHEDULED, INTERVIEW_UPDATED, JOB_CREATED
 
 ### Community 72 - "ApiResponseSerializationTest.java"
 Cohesion: 0.60
 Nodes (3): ApiResponseSerializationTest, ObjectMapper, Test
+
+### Community 73 - "CandidateRequest"
+Cohesion: 0.29
+Nodes (7): GetMapping, Page, Pageable, RequestMapping, ResponseEntity, RestController, JobController
+
+### Community 74 - "JobRequest"
+Cohesion: 0.24
+Nodes (6): Getter, Setter, JobRequest, EmploymentType, FULLTIME, PARTTIME
+
+### Community 75 - "UserServiceTest.java"
+Cohesion: 0.60
+Nodes (5): ExtendWith, ObjectMapper, PasswordEncoder, UserRepository, UserServiceTest
 
 ## Ambiguous Edges - Review These
 - `Development Rules` → `DOCUMENT_API.md — ATS REST API Documentation`  [AMBIGUOUS]
   CLAUDE.md · relation: references
 
 ## Knowledge Gaps
-- **70 isolated node(s):** `com.example:ats`, `APPLICATION_CREATED`, `SCREENING`, `INTERVIEW`, `OFFER` (+65 more)
+- **89 isolated node(s):** `com.example:ats`, `APPLICATION_CREATED`, `SCREENING`, `INTERVIEW`, `OFFER` (+84 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **5 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **4 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
 - **What is the exact relationship between `Development Rules` and `DOCUMENT_API.md — ATS REST API Documentation`?**
   _Edge tagged AMBIGUOUS (relation: references) - confidence is low._
-- **Why does `ApiResponse` connect `Admin Job Controller` to `InterviewFeedbackResponse`, `Candidate Controller`, `Admin Company Controller`, `Resume Controller`, `Candidate`, `Global Exception Handling & Config`, `User Request/Response DTOs`, `RecruiterResponse`, `AdminInterviewController.java`, `Admin Application Controller`, `ApiResponseSerializationTest.java`, `Candidate Application Controller`, `Admin User Controller`, `RecruiterInterviewController.java`, `Recruiter Application Controller`, `NotificationEntity`, `InterviewController.java`, `API Response Serialization Tests`?**
-  _High betweenness centrality (0.211) - this node is a cross-community bridge._
-- **Why does `ResourceNotFoundException` connect `ResourceNotFoundException` to `Admin Job Controller`, `Company & Job Mapping/Repos`, `Candidate Controller`, `InterviewFeedbackEntity`, `JobService.java`, `Admin Company Controller`, `Company`, `Notification`, `Recruiter Controller`, `Global Exception Handling & Config`, `CandidateRequest`, `User Entity & Repositories`, `JWT Service`, `Resume Controller`, `Job Application Service`, `JpaRepository`, `Admin User Management`, `Auth Service & User Mapper`?**
-  _High betweenness centrality (0.156) - this node is a cross-community bridge._
-- **Why does `Role` connect `JWT Service` to `Job Application Mapping/Repos`, `User Entity & Repositories`, `Candidate`, `User Request/Response DTOs`, `WebSocketConfig`?**
-  _High betweenness centrality (0.072) - this node is a cross-community bridge._
+- **Why does `ApiResponse` connect `RecruiterInterviewController.java` to `InterviewFeedbackResponse`, `Candidate Controller`, `CompanyEntity`, `Admin Company Controller`, `Resume Controller`, `ApiResponseSerializationTest.java`, `CandidateRequest`, `User Request/Response DTOs`, `Global Exception Handling & Config`, `AdminInterviewController.java`, `Admin Application Controller`, `Candidate Application Controller`, `Admin User Controller`, `Recruiter Application Controller`, `NotificationEntity`, `Auth Service & User Mapper`, `InterviewController.java`, `API Response Serialization Tests`?**
+  _High betweenness centrality (0.219) - this node is a cross-community bridge._
+- **Why does `ResourceNotFoundException` connect `ResourceNotFoundException` to `Admin Job Controller`, `Company & Job Mapping/Repos`, `Candidate Controller`, `Job Application Mapping/Repos`, `Company`, `Admin Company Controller`, `User Entity & Repositories`, `Notification`, `Candidate`, `Global Exception Handling & Config`, `CandidateRequest`, `Resume Controller`, `JWT Service`, `Job Application Service`, `JpaRepository`, `Admin User Management`, `WebSocketAuthInterceptor`?**
+  _High betweenness centrality (0.161) - this node is a cross-community bridge._
+- **Why does `Role` connect `JWT Service` to `JobApplicationResponse`, `User Entity & Repositories`, `User Request/Response DTOs`, `Auth Service & User Mapper`, `WebSocketConfig`?**
+  _High betweenness centrality (0.066) - this node is a cross-community bridge._
 - **What connects `com.example:ats`, `APPLICATION_CREATED`, `SCREENING` to the rest of the system?**
-  _70 weakly-connected nodes found - possible documentation gaps or missing edges._
-- **Should `Admin Job Controller` be split into smaller, more focused modules?**
-  _Cohesion score 0.052129326306793906 - nodes in this community are weakly interconnected._
+  _89 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Company & Job Mapping/Repos` be split into smaller, more focused modules?**
-  _Cohesion score 0.05413507317933345 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.06544566544566545 - nodes in this community are weakly interconnected._
+- **Should `Candidate Controller` be split into smaller, more focused modules?**
+  _Cohesion score 0.07192982456140351 - nodes in this community are weakly interconnected._
