@@ -11,6 +11,7 @@ import com.example.ats.application.mapper.JobApplicationMapper;
 import com.example.ats.application.mapper.JobMapper;
 import com.example.ats.application.mapper.ResumeMapper;
 import com.example.ats.application.mapper.UserMapper;
+import com.example.ats.application.port.in.AuditLogUseCase;
 import com.example.ats.application.port.in.JobApplicationUseCase;
 import com.example.ats.application.port.in.NotificationUseCase;
 import com.example.ats.application.port.out.InterviewRepository;
@@ -20,6 +21,8 @@ import com.example.ats.application.port.out.ResumeRepository;
 import com.example.ats.domain.exception.BusinessRuleException;
 import com.example.ats.domain.exception.ResourceNotFoundException;
 import com.example.ats.domain.model.ApplicationStatus;
+import com.example.ats.domain.model.AuditAction;
+import com.example.ats.domain.model.AuditEntityType;
 import com.example.ats.domain.model.InterviewResult;
 import com.example.ats.domain.model.Job;
 import com.example.ats.domain.model.JobApplication;
@@ -68,13 +71,15 @@ public class JobApplicationService implements JobApplicationUseCase {
     private final CompanyMapper companyMapper;
     private final ResumeMapper resumeMapper;
     private final NotificationUseCase notificationUseCase;
+    private final AuditLogUseCase auditLog;
 
     public JobApplicationService(JobApplicationRepository repository, JobRepository jobRepository,
                                  ResumeRepository resumeRepository, InterviewRepository interviewRepository,
                                  JobApplicationMapper mapper,
                                  CandidateMapper candidateMapper, UserMapper userMapper,
                                  JobMapper jobMapper, CompanyMapper companyMapper,
-                                 ResumeMapper resumeMapper, NotificationUseCase notificationUseCase) {
+                                 ResumeMapper resumeMapper, NotificationUseCase notificationUseCase,
+                                 AuditLogUseCase auditLog) {
         this.repository = repository;
         this.jobRepository = jobRepository;
         this.resumeRepository = resumeRepository;
@@ -86,6 +91,7 @@ public class JobApplicationService implements JobApplicationUseCase {
         this.companyMapper = companyMapper;
         this.resumeMapper = resumeMapper;
         this.notificationUseCase = notificationUseCase;
+        this.auditLog = auditLog;
     }
 
     @Override
@@ -103,6 +109,8 @@ public class JobApplicationService implements JobApplicationUseCase {
                 Instant.now(), null);
         JobApplicationView view = repository.save(application);
         notifyApplicationReceived(view);
+        auditLog.log(AuditAction.APPLICATION_CREATED, AuditEntityType.APPLICATION, view.application().getId(),
+                "Ứng tuyển job: " + view.job().getTitle());
         return toResponse(view);
     }
 
@@ -189,14 +197,23 @@ public class JobApplicationService implements JobApplicationUseCase {
     @Override
     public void delete(Long id) {
         repository.deleteById(id);
+        auditLog.log(AuditAction.APPLICATION_DELETED, AuditEntityType.APPLICATION, id,
+                "Xóa vĩnh viễn đơn ứng tuyển #" + id);
     }
 
     private JobApplicationView changeStatus(JobApplication application, ApplicationStatus newStatus) {
-        validateStatusTransition(application.getStatus(), newStatus);
+        ApplicationStatus oldStatus = application.getStatus();
+        validateStatusTransition(oldStatus, newStatus);
         validatePassedInterview(application, newStatus);
         application.setStatus(newStatus);
         application.setUpdatedAt(Instant.now());
-        return repository.save(application);
+        JobApplicationView saved = repository.save(application);
+        if (oldStatus != newStatus) {
+            auditLog.log(AuditAction.APPLICATION_STATUS_CHANGED, AuditEntityType.APPLICATION, application.getId(),
+                    "Đổi trạng thái đơn #" + application.getId() + " từ " + oldStatus + " sang " + newStatus,
+                    oldStatus != null ? oldStatus.name() : null, newStatus.name());
+        }
+        return saved;
     }
 
     private void rejectWithdrawnTarget(ApplicationStatus newStatus) {

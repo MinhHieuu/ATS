@@ -5,9 +5,12 @@ import com.example.ats.application.dto.request.UserRequest;
 
 import com.example.ats.application.dto.response.UserResponse;
 import com.example.ats.application.mapper.UserMapper;
+import com.example.ats.application.port.in.AuditLogUseCase;
 import com.example.ats.application.port.in.UserUseCase;
 import com.example.ats.application.port.out.UserRepository;
 import com.example.ats.domain.exception.BusinessRuleException;
+import com.example.ats.domain.model.AuditAction;
+import com.example.ats.domain.model.AuditEntityType;
 import com.example.ats.domain.model.Role;
 import com.example.ats.domain.model.User;
 import jakarta.transaction.Transactional;
@@ -26,12 +29,15 @@ public class UserService implements UserUseCase {
     private final UserRepository userRepository;
     private final PasswordEncoder encode;
     private final UserMapper mapper;
+    private final AuditLogUseCase auditLog;
     private static final Pattern EMAIL_PATTERN =
             Pattern.compile("^[A-Za-z][A-Za-z0-9._%+-]*@[A-Za-z0-9-]+(?:\\.[A-Za-z0-9-]+)+$");
-    public UserService(UserRepository userRepository, PasswordEncoder encode, UserMapper mapper) {
+    public UserService(UserRepository userRepository, PasswordEncoder encode, UserMapper mapper,
+                       AuditLogUseCase auditLog) {
         this.userRepository = userRepository;
         this.encode = encode;
         this.mapper = mapper;
+        this.auditLog = auditLog;
     }
 
     @Override
@@ -56,8 +62,11 @@ public class UserService implements UserUseCase {
             throw new BusinessRuleException("Phone already exists");
         }
         Instant now = Instant.now();
-        return mapper.toResponse(userRepository.save(new User(null, email, request.getFullname(), encode.encode(password),
-         phone, "default-avatar.jpg", true, now, null, role)));
+        User saved = userRepository.save(new User(null, email, request.getFullname(), encode.encode(password),
+         phone, "default-avatar.jpg", true, now, null, role));
+        auditLog.log(AuditAction.USER_CREATED, AuditEntityType.USER, saved.getId(),
+                "Tạo tài khoản " + email + " với vai trò " + role);
+        return mapper.toResponse(saved);
     }
 
     @Override
@@ -92,7 +101,10 @@ public class UserService implements UserUseCase {
 
     @Override
     public UserResponse activate(Long id) {
-        return updateActive(id, true);
+        UserResponse response = updateActive(id, true);
+        auditLog.log(AuditAction.USER_ACTIVATED, AuditEntityType.USER, id,
+                "Mở khóa tài khoản #" + id, "false", "true");
+        return response;
     }
 
     @Override
@@ -102,7 +114,10 @@ public class UserService implements UserUseCase {
         if (id.equals(currentUserId)) {
             throw new BusinessRuleException("Cannot deactivate your own account");
         }
-        return updateActive(id, false);
+        UserResponse response = updateActive(id, false);
+        auditLog.log(AuditAction.USER_DEACTIVATED, AuditEntityType.USER, id,
+                "Khóa tài khoản #" + id, "true", "false");
+        return response;
     }
 
     private UserResponse updateActive(Long id, boolean active) {
@@ -120,7 +135,10 @@ public class UserService implements UserUseCase {
         }
         Instant now = Instant.now();
         user.setUpdatedAt(now);
-        return mapper.toResponse(userRepository.save(user));
+        User saved = userRepository.save(user);
+        auditLog.log(AuditAction.USER_UPDATED, AuditEntityType.USER, saved.getId(),
+                "Cập nhật thông tin tài khoản " + saved.getEmail());
+        return mapper.toResponse(saved);
     }
 
     @Override

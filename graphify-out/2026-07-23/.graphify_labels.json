@@ -69,7 +69,8 @@
   "67": "JobRequest",
   "68": "NotificationEntity",
   "69": "JobApplicationResponse",
-  "70": "UserEntity",
-  "71": "SpringDataUserRepository.java",
-  "72": "ApiResponseSerializationTest.java"
+  "70": "AuditAction",
+  "71": "NotificationType",
+  "72": "ApiResponseSerializationTest.java",
+  "73": "CandidateRequest"
 }

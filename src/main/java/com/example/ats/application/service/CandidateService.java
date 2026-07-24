@@ -5,9 +5,12 @@ import com.example.ats.application.dto.response.CandidateResponse;
 import com.example.ats.application.dto.response.UserResponse;
 import com.example.ats.application.mapper.CandidateMapper;
 import com.example.ats.application.mapper.UserMapper;
+import com.example.ats.application.port.in.AuditLogUseCase;
 import com.example.ats.application.port.in.CandidateUseCase;
 import com.example.ats.application.port.in.UserUseCase;
 import com.example.ats.application.port.out.CandidateRepository;
+import com.example.ats.domain.model.AuditAction;
+import com.example.ats.domain.model.AuditEntityType;
 import com.example.ats.domain.model.Candidate;
 import com.example.ats.domain.model.Role;
 import com.example.ats.domain.view.CandidateView;
@@ -25,13 +28,15 @@ public class CandidateService implements CandidateUseCase {
     private final UserUseCase userUseCase;
     private final CandidateMapper mapper;
     private final UserMapper userMapper;
+    private final AuditLogUseCase auditLog;
 
     public CandidateService(CandidateRepository repository, UserUseCase userUseCase,
-                            CandidateMapper mapper, UserMapper userMapper) {
+                            CandidateMapper mapper, UserMapper userMapper, AuditLogUseCase auditLog) {
         this.repository = repository;
         this.userUseCase = userUseCase;
         this.mapper = mapper;
         this.userMapper = userMapper;
+        this.auditLog = auditLog;
     }
 
     @Override
@@ -45,6 +50,8 @@ public class CandidateService implements CandidateUseCase {
         );
         CandidateResponse response = mapper.toResponse(candidate);
         if(user != null) response.setUser(user);
+        auditLog.log(AuditAction.CANDIDATE_CREATED, AuditEntityType.CANDIDATE, candidate.getId(),
+                "Tạo hồ sơ ứng viên cho tài khoản " + (user != null ? user.getEmail() : "?"));
         return response;
     }
 
@@ -66,6 +73,8 @@ public class CandidateService implements CandidateUseCase {
         repository.save(candidate);
         CandidateResponse response = mapper.toResponse(candidate);
         if(user != null) response.setUser(user);
+        auditLog.log(AuditAction.CANDIDATE_UPDATED, AuditEntityType.CANDIDATE, candidate.getId(),
+                "Cập nhật hồ sơ ứng viên #" + candidate.getId());
         return response;
     }
 

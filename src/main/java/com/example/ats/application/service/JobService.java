@@ -6,12 +6,15 @@ import com.example.ats.application.mapper.CategoryMapper;
 import com.example.ats.application.mapper.CompanyMapper;
 import com.example.ats.application.mapper.JobMapper;
 import com.example.ats.application.mapper.UserMapper;
+import com.example.ats.application.port.in.AuditLogUseCase;
 import com.example.ats.application.port.in.JobUseCase;
 import com.example.ats.application.port.in.NotificationUseCase;
 import com.example.ats.application.port.out.CategoryRepository;
 import com.example.ats.application.port.out.JobRepository;
 import com.example.ats.domain.exception.BusinessRuleException;
 import com.example.ats.domain.exception.ResourceNotFoundException;
+import com.example.ats.domain.model.AuditAction;
+import com.example.ats.domain.model.AuditEntityType;
 import com.example.ats.domain.model.Category;
 import com.example.ats.domain.model.Job;
 import com.example.ats.domain.model.JobStatus;
@@ -34,10 +37,11 @@ public class JobService implements JobUseCase {
     private final CategoryMapper categoryMapper;
     private final UserMapper userMapper;
     private final NotificationUseCase notificationUseCase;
+    private final AuditLogUseCase auditLog;
 
     public JobService(JobRepository repository, CategoryRepository categoryRepository, JobMapper mapper,
                       CompanyMapper companyMapper, CategoryMapper categoryMapper, UserMapper userMapper,
-                      NotificationUseCase notificationUseCase) {
+                      NotificationUseCase notificationUseCase, AuditLogUseCase auditLog) {
         this.repository = repository;
         this.categoryRepository = categoryRepository;
         this.mapper = mapper;
@@ -45,6 +49,7 @@ public class JobService implements JobUseCase {
         this.categoryMapper = categoryMapper;
         this.userMapper = userMapper;
         this.notificationUseCase = notificationUseCase;
+        this.auditLog = auditLog;
     }
 
     @Override
@@ -72,12 +77,15 @@ public class JobService implements JobUseCase {
                 "Job mới được tạo",
                 creatorName + " đã tạo job: " + view.job().getTitle(),
                 view.job().getId(), null);
+        auditLog.log(AuditAction.JOB_CREATED, AuditEntityType.JOB, view.job().getId(),
+                "Tạo tin tuyển dụng: " + view.job().getTitle());
         return toResponse(view);
     }
 
     @Override
     public JobResponse update(Long id, JobRequest request) {
         Job job = repository.findById(id).job();
+        JobStatus oldStatus = job.getStatus();
         job.setTitle(request.getTitle());
         job.setDescription(request.getDescription());
         job.setRequirements(request.getRequirements());
@@ -91,7 +99,18 @@ public class JobService implements JobUseCase {
             job.setStatus(request.getStatus());
         }
         job.setUpdatedAt(Instant.now());
-        return toResponse(repository.save(job));
+        JobView view = repository.save(job);
+        auditLog.log(AuditAction.JOB_UPDATED, AuditEntityType.JOB, id,
+                "Cập nhật tin tuyển dụng: " + view.job().getTitle());
+        // Neu chinh sua chung cung doi luon trang thai, ghi them JOB_STATUS_CHANGED de audit trail
+        // dong nhat voi luong activate/deactivate.
+        JobStatus newStatus = view.job().getStatus();
+        if (oldStatus != newStatus) {
+            auditLog.log(AuditAction.JOB_STATUS_CHANGED, AuditEntityType.JOB, id,
+                    "Đổi trạng thái job #" + id + " từ " + oldStatus + " sang " + newStatus,
+                    oldStatus != null ? oldStatus.name() : null, newStatus != null ? newStatus.name() : null);
+        }
+        return toResponse(view);
     }
 
     @Override
@@ -167,6 +186,7 @@ public class JobService implements JobUseCase {
     @Override
     public void delete(Long id) {
         repository.deleteById(id);
+        auditLog.log(AuditAction.JOB_DELETED, AuditEntityType.JOB, id, "Xóa tin tuyển dụng #" + id);
     }
 
     // Recruiter chi duoc chon category dang mo; admin khong bi rang buoc nay.
@@ -182,9 +202,16 @@ public class JobService implements JobUseCase {
 
     private JobResponse updateStatus(Long id, JobStatus status) {
         Job job = repository.findById(id).job();
+        JobStatus oldStatus = job.getStatus();
         job.setStatus(status);
         job.setUpdatedAt(Instant.now());
-        return toResponse(repository.save(job));
+        JobResponse response = toResponse(repository.save(job));
+        if (oldStatus != status) {
+            auditLog.log(AuditAction.JOB_STATUS_CHANGED, AuditEntityType.JOB, id,
+                    "Đổi trạng thái job #" + id + " từ " + oldStatus + " sang " + status,
+                    oldStatus != null ? oldStatus.name() : null, status.name());
+        }
+        return response;
     }
 
     private JobResponse toResponse(JobView view) {

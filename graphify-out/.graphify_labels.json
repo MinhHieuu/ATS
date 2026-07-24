@@ -69,5 +69,10 @@
   "67": "JobRequest",
   "68": "NotificationEntity",
   "69": "JobApplicationResponse",
-  "72": "ApiResponseSerializationTest.java"
+  "70": "AuditAction",
+  "71": "NotificationType",
+  "72": "ApiResponseSerializationTest.java",
+  "73": "CandidateRequest",
+  "74": "JobRequest",
+  "75": "UserServiceTest.java"
 }
